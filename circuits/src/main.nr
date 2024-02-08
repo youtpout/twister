@@ -12,8 +12,8 @@ fn main(
 ) -> pub Field {
     let mut newNullifier:Field = 0;
     if deposit {
+        assert(oldAmount == amount);
         newNullifier = std::hash::pedersen_hash([secret, amount]);
-        assert(newNullifier == nullifier);
     }
     else{
         newNullifier = checkWithdraw(secret,index,oldAmount,merkle_proof,merkle_root,nullifier,amount);
@@ -65,7 +65,7 @@ fn checkWithdraw(
     assert(nullifier == hash_secretNullifer);
     //assert(merkleHash == hashRoot);
 
-   let newNullifier = std::hash::pedersen_hash([secret, 5]);
+   let newNullifier = std::hash::pedersen_hash([secret, newAmount]);
    newNullifier
 }
 
