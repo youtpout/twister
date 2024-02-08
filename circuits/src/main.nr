@@ -2,28 +2,32 @@ use dep::std;
 
 fn main(
     secret: Field,
+    salt: Field,
     index: Field,
     oldAmount: Field,
     merkle_proof: [[u8; 32]; 3],
+    leaf: pub Field,
     merkle_root: pub Field,
     nullifier: pub Field,
     amount: pub Field,
     deposit: pub bool
 ) -> pub Field {
-    let mut newNullifier:Field = 0;
+    let mut newLeaf:Field = 0;
     if deposit {
         assert(oldAmount == amount);
-        newNullifier = std::hash::pedersen_hash([secret, amount]);
+        newLeaf = std::hash::poseidon::bn254::hash_3([salt,secret,amount]);
+        assert(newLeaf == leaf);
     }
     else{
-        newNullifier = checkWithdraw(secret,index,oldAmount,merkle_proof,merkle_root,nullifier,amount);
+        newLeaf = checkWithdraw(secret,salt,index,oldAmount,merkle_proof,merkle_root,nullifier,amount);
     }
 
-    newNullifier
+    newLeaf
 }
 
 fn checkWithdraw(
     secret: Field,
+    salt: Field,
     index: Field,
     oldAmount:Field,
     merkle_proof: [[u8; 32]; 3],
@@ -39,7 +43,8 @@ fn checkWithdraw(
 
     let newAmount = oldAmount - amount;
 
-    let hash_secret = std::hash::poseidon::bn254::hash_1([secret]);
+    // change hash secret to generate new leaf
+    let hash_secret = std::hash::poseidon::bn254::hash_3([salt,secret,newAmount]);
 
     let mut merkleHash:[u8; 32] = [0;32];
 
