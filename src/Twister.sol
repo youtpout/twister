@@ -7,7 +7,7 @@ contract Twister {
     uint256 index = 0;
     bytes32 root;
     mapping(uint256 => bytes32) leafs;
-    mapping(address => bytes32) secrets;
+    mapping(bytes32 => bool) leafExist;
     mapping(address => uint256) daggersPossessed;
     mapping(bytes32 => bool) used;
     UltraVerifier public verifier;
@@ -26,7 +26,9 @@ contract Twister {
 
 
     function deposit(bytes32 _merkleLeaf) external payable {
+        require(!leafExist[_merkleLeaf], "LEAF_EXIST");
         leafs[index] = _merkleLeaf;
+        leafExist[_merkleLeaf] = true;
         index++;
         computeRoot();
     }
@@ -41,8 +43,13 @@ contract Twister {
         root = _hashPair(e, f);
     }
 
-    function withdraw(bytes32 _nullifier, uint256 amount, bytes calldata _proof) external {
+    function withdraw(bytes32 _nullifier, bytes32 _merkleLeaf, uint256 amount, bytes calldata _proof) external {
         require(!used[_nullifier], "REPLAYED_NULLIFIER");
+        require(!leafExist[_merkleLeaf], "LEAF_EXIST");
+        leafs[index] = _merkleLeaf;
+        leafExist[_merkleLeaf] = true;
+        index++;
+
         bytes32[] memory _publicInputs = new bytes32[](2);
         
         _publicInputs[0] = root;
