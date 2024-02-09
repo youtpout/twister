@@ -2,7 +2,6 @@ use dep::std;
 
 fn main(
     secret: Field,
-    salt: Field,
     index: Field,
     oldAmount: Field,
     merkle_proof: [[u8; 32]; 3],
@@ -15,14 +14,13 @@ fn main(
     let mut result:[Field; 2] = [0; 2];
     if deposit {
         assert(oldAmount == amount);
-        let newLeaf = std::hash::poseidon::bn254::hash_3([salt, secret, amount]);
-        let nullifier = std::hash::pedersen_hash([secret, oldAmount]);
+        let newLeaf = std::hash::poseidon::bn254::hash_2([secret, amount]);
+        let nullifier = std::hash::pedersen_hash([amount, secret]);
         assert(newLeaf == leaf);
         result = [newLeaf,nullifier];
     } else {
         result = checkWithdraw(
             secret,
-            salt,
             index,
             oldAmount,
             leaf,
@@ -38,7 +36,6 @@ fn main(
 
 fn checkWithdraw(
     secret: Field,
-    salt: Field,
     index: Field,
     oldAmount: Field,
     leaf: Field,
@@ -56,7 +53,7 @@ fn checkWithdraw(
     let newAmount = oldAmount - amount;
 
     // change hash secret to generate new leaf
-    let hash_secret = std::hash::poseidon::bn254::hash_3([salt, secret, oldAmount]);
+    let hash_secret = std::hash::poseidon::bn254::hash_2([oldAmount, secret]);
     assert(hash_secret == leaf);
 
     let mut merkleHash:[u8; 32] = [0; 32];
@@ -83,8 +80,8 @@ fn checkWithdraw(
     assert(nullifier == hash_secretNullifer);
     assert(merkleHash == hashRoot);
 
-    let newLeaf = std::hash::poseidon::bn254::hash_3([salt, secret, newAmount]);
-    let newNullifier = std::hash::pedersen_hash([secret, newAmount]);
+    let newLeaf = std::hash::poseidon::bn254::hash_2([secret, newAmount]);
+    let newNullifier = std::hash::pedersen_hash([newAmount, secret]);
     [newLeaf, newNullifier]
 }
 
