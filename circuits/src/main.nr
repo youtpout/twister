@@ -11,17 +11,29 @@ fn main(
     nullifier: pub Field,
     amount: pub Field,
     deposit: pub bool
-) -> pub Field {
-    let mut newLeaf:Field = 0;
+) -> pub [Field; 2] {
+    let mut result:[Field; 2] = [0; 2];
     if deposit {
         assert(oldAmount == amount);
-        newLeaf = std::hash::poseidon::bn254::hash_3([salt,secret,amount]);
+        let newLeaf = std::hash::poseidon::bn254::hash_3([salt, secret, amount]);
+        let nullifier = std::hash::pedersen_hash([secret, oldAmount]);
         assert(newLeaf == leaf);
+        result = [newLeaf,nullifier];
     } else {
-        newLeaf = checkWithdraw(secret,salt,index,oldAmount,leaf,merkle_proof,merkle_root,nullifier,amount);
+        result = checkWithdraw(
+            secret,
+            salt,
+            index,
+            oldAmount,
+            leaf,
+            merkle_proof,
+            merkle_root,
+            nullifier,
+            amount
+        );
     }
 
-    newLeaf
+    result
 }
 
 fn checkWithdraw(
@@ -34,7 +46,7 @@ fn checkWithdraw(
     merkle_root: Field,
     nullifier: Field,
     amount: Field
-) -> Field {
+) -> [Field; 2] {
     let hash_secretNullifer = std::hash::pedersen_hash([secret, oldAmount]);
 
     let amountOut = amount as u32;
@@ -72,7 +84,8 @@ fn checkWithdraw(
     assert(merkleHash == hashRoot);
 
     let newLeaf = std::hash::poseidon::bn254::hash_3([salt, secret, newAmount]);
-    newLeaf
+    let newNullifier = std::hash::pedersen_hash([secret, newAmount]);
+    [newLeaf, newNullifier]
 }
 
 fn hashpair(merkleA: [u8; 32], merkleB: [u8; 32], inverse: bool) -> [u8; 32] {
