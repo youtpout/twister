@@ -1,0 +1,106 @@
+{
+  "_format": "ethers-rs-sol-cache-3",
+  "paths": {
+    "artifacts": "out",
+    "build_infos": "out/build-info",
+    "sources": "src",
+    "tests": "test",
+    "scripts": "script",
+    "libraries": [
+      "lib",
+      "node_modules"
+    ]
+  },
+  "files": {
+    "circuits/contract/noirstarter/plonk_vk.sol": {
+      "lastModificationDate": 1707515721851,
+      "contentHash": "c999857ca99981017f3a4f1d09a6240f",
+      "sourceName": "circuits/contract/noirstarter/plonk_vk.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.8.4",
+      "artifacts": {
+        "BaseUltraVerifier": {
+          "0.8.21+commit.d9974bed.Darwin.appleclang": "plonk_vk.sol/BaseUltraVerifier.json"
+        },
+        "UltraVerificationKey": {
+          "0.8.21+commit.d9974bed.Darwin.appleclang": "plonk_vk.sol/UltraVerificationKey.json"
+        },
+        "UltraVerifier": {
+          "0.8.21+commit.d9974bed.Darwin.appleclang": "plonk_vk.sol/UltraVerifier.json"
+        }
+      }
+    },
+    "src/Twister.sol": {
+      "lastModificationDate": 1707518918923,
+      "contentHash": "ba69c0fdc817071f38c937c3338d90ea",
+      "sourceName": "src/Twister.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "circuits/contract/noirstarter/plonk_vk.sol"
+      ],
+      "versionRequirement": "^0.8.19",
+      "artifacts": {
+        "Twister": {
+          "0.8.21+commit.d9974bed.Darwin.appleclang": "Twister.sol/Twister.json"
+        }
+      }
+    }
+  }
+}

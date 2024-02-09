@@ -2,26 +2,31 @@ use dep::std;
 
 fn main(
     secret: Field,
-    index: Field,
     oldAmount: Field,
-    merkle_proof: [[u8; 32]; 3],
+    // tree with 8 depth for test
+    merkle_proof: [([u8; 32],bool); 8],
     leaf: pub Field,
     merkle_root: pub Field,
     nullifier: pub Field,
     amount: pub Field,
+    receiver: pub Field,
+    relayer: pub Field,
     deposit: pub bool
 ) -> pub [Field; 2] {
     let mut result:[Field; 2] = [0; 2];
     if deposit {
+        // we check on deposit if the user deposit the correct amount of eth
         assert(oldAmount == amount);
         let newLeaf = std::hash::poseidon::bn254::hash_2([secret, amount]);
         let nullifier = std::hash::pedersen_hash([amount, secret]);
         assert(newLeaf == leaf);
         result = [newLeaf,nullifier];
     } else {
+        // we need to define relayer and receiver to withdraw, relayer and receiver can be the same account
+        assert(receiver != 0);
+        assert(relayer != 0);
         result = checkWithdraw(
             secret,
-            index,
             oldAmount,
             leaf,
             merkle_proof,
@@ -31,29 +36,31 @@ fn main(
         );
     }
 
+    // for each proof we generate new leaf and nullifier for next withdraw
     result
 }
 
 fn checkWithdraw(
     secret: Field,
-    index: Field,
     oldAmount: Field,
     leaf: Field,
-    merkle_proof: [[u8; 32]; 3],
+    merkle_proof: [([u8; 32],bool); 8],
     merkle_root: Field,
     nullifier: Field,
     amount: Field
 ) -> [Field; 2] {
     let hash_secretNullifer = std::hash::pedersen_hash([secret, oldAmount]);
+    assert(nullifier == hash_secretNullifer);
 
     // uint112 type like uniswap pool
     let amountOut = amount as u112;
     let amountOld = oldAmount as u112;
+    // we can't withdraw more than actual account amount
     assert(amountOut <= amountOld);
 
     let newAmount = oldAmount - amount;
 
-    // change hash secret to generate new leaf
+    // check if leaf match secret and amount
     let hash_secret = std::hash::poseidon::bn254::hash_2([oldAmount, secret]);
     assert(hash_secret == leaf);
 
@@ -64,13 +71,10 @@ fn checkWithdraw(
         merkleHash[j] = t[j];
     }
 
-    let i = index as u32;
-    let mut inverse = i % 2 != 0;
-    merkleHash = hashpair(merkleHash,merkle_proof[0],inverse);
-    inverse = (i == 2) | (i== 3) | (i== 6) | (i==7);
-    merkleHash = hashpair(merkleHash,merkle_proof[1],inverse);
-    inverse = i > 3;
-    merkleHash = hashpair(merkleHash,merkle_proof[2],inverse);
+    for index in 0 .. merkle_proof {
+        let (mp,inverse) = merkle_proof[index];
+         merkleHash = hashpair(merkleHash,mp,inverse);
+    }
 
     let root = merkle_root.to_be_bytes(32);
     let mut hashRoot:[u8; 32] = [0; 32];
@@ -78,9 +82,9 @@ fn checkWithdraw(
         hashRoot[j] = root[j];
     }
 
-    assert(nullifier == hash_secretNullifer);
     assert(merkleHash == hashRoot);
 
+    // generate new leaf and new nullifier for next withdraw
     let newLeaf = std::hash::poseidon::bn254::hash_2([secret, newAmount]);
     let newNullifier = std::hash::pedersen_hash([newAmount, secret]);
     [newLeaf, newNullifier]
