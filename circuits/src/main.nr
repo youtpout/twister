@@ -17,8 +17,7 @@ fn main(
         assert(oldAmount == amount);
         newLeaf = std::hash::poseidon::bn254::hash_3([salt,secret,amount]);
         assert(newLeaf == leaf);
-    }
-    else{
+    } else {
         newLeaf = checkWithdraw(secret,salt,index,oldAmount,leaf,merkle_proof,merkle_root,nullifier,amount);
     }
 
@@ -29,29 +28,29 @@ fn checkWithdraw(
     secret: Field,
     salt: Field,
     index: Field,
-    oldAmount:Field,
-    leaf:Field,
+    oldAmount: Field,
+    leaf: Field,
     merkle_proof: [[u8; 32]; 3],
-    merkle_root:  Field,
-    nullifier:  Field,
+    merkle_root: Field,
+    nullifier: Field,
     amount: Field
 ) -> Field {
     let hash_secretNullifer = std::hash::pedersen_hash([secret, oldAmount]);
 
     let amountOut = amount as u32;
     let amountOld = oldAmount as u32;
-    assert(amountOut<=amountOld);
+    assert(amountOut <= amountOld);
 
     let newAmount = oldAmount - amount;
 
     // change hash secret to generate new leaf
-    let hash_secret = std::hash::poseidon::bn254::hash_3([salt,secret,oldAmount]);
+    let hash_secret = std::hash::poseidon::bn254::hash_3([salt, secret, oldAmount]);
     assert(hash_secret == leaf);
 
-    let mut merkleHash:[u8; 32] = [0;32];
+    let mut merkleHash:[u8; 32] = [0; 32];
 
     let t = hash_secret.to_be_bytes(32);
-    for j in 0 .. merkleHash.len() {
+    for j in 0..merkleHash.len() {
         merkleHash[j] = t[j];
     }
 
@@ -64,38 +63,33 @@ fn checkWithdraw(
     merkleHash = hashpair(merkleHash,merkle_proof[2],inverse);
 
     let root = merkle_root.to_be_bytes(32);
-    let mut hashRoot:[u8; 32] = [0;32];
-    for j in 0 .. 32 {
+    let mut hashRoot:[u8; 32] = [0; 32];
+    for j in 0..32 {
         hashRoot[j] = root[j];
     }
 
     assert(nullifier == hash_secretNullifer);
-    //assert(merkleHash == hashRoot);
+    assert(merkleHash == hashRoot);
 
-   let newLeaf = std::hash::poseidon::bn254::hash_3([salt,secret,newAmount]);
-   newLeaf
+    let newLeaf = std::hash::poseidon::bn254::hash_3([salt, secret, newAmount]);
+    newLeaf
 }
 
-fn hashpair(
-   merkleA: [u8; 32],
-   merkleB: [u8; 32],
-   inverse: bool
-) -> [u8; 32] {
-    let mut proofHash :[u8; 64] = [0 ;64];
+fn hashpair(merkleA: [u8; 32], merkleB: [u8; 32], inverse: bool) -> [u8; 32] {
+    let mut proofHash :[u8; 64] = [0; 64];
 
-    if(inverse){
+    if (inverse) {
         for i in 0..merkleA.len() {
             // use like this to prevent nargo crash
             proofHash[i+32] = merkleA[i];
             proofHash[i] = merkleB[i];
         }
-    }
-    else{
+    } else {
         for i in 0..merkleA.len() {
             proofHash[i] = merkleA[i];
             proofHash[i+32] = merkleB[i];
         }
     }
 
-    std::hash::keccak256(proofHash,64) 
+    std::hash::keccak256(proofHash, 64)
 }
