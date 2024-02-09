@@ -46,8 +46,9 @@ fn checkWithdraw(
 ) -> [Field; 2] {
     let hash_secretNullifer = std::hash::pedersen_hash([secret, oldAmount]);
 
-    let amountOut = amount as u32;
-    let amountOld = oldAmount as u32;
+    // uint112 type like uniswap pool
+    let amountOut = amount as u112;
+    let amountOld = oldAmount as u112;
     assert(amountOut <= amountOld);
 
     let newAmount = oldAmount - amount;
