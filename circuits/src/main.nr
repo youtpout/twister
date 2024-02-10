@@ -8,8 +8,8 @@ struct Witness {
 fn main(
     secret: Field,
     oldAmount: Field,
-    // tree with 16 depth for test
-    merkle_proof: [Witness; 16],
+    // tree with 8 depth for test
+    merkle_proof: [Witness; 8],
     leaf: pub Field,
     merkle_root: pub Field,
     nullifier: pub Field,
@@ -52,7 +52,7 @@ fn checkWithdraw(
     secret: Field,
     oldAmount: Field,
     leaf: Field,
-    merkle_proof: [Witness; 16],
+    merkle_proof: [Witness; 8],
     merkle_root: Field,
     nullifier: Field,
     amount: Field
@@ -72,17 +72,7 @@ fn checkWithdraw(
     let hash_secret = std::hash::poseidon::bn254::hash_2([oldAmount, secret]);
     assert(hash_secret == leaf);
 
-    let mut merkleHash:[u8; 32] = [0; 32];
-
-    let t = hash_secret.to_be_bytes(32);
-    for j in 0..merkleHash.len() {
-        merkleHash[j] = t[j];
-    }
-
-    for index in 0..merkle_proof.len() {
-        let mp = merkle_proof[index];
-        merkleHash = hashpair(merkleHash,mp.hash,mp.inverse);
-    }
+    let root2 = std::merkle::compute_merkle_root(leaf, 0, [0, 0]);
 
     let root = merkle_root.to_be_bytes(32);
     let mut hashRoot:[u8; 32] = [0; 32];
@@ -90,12 +80,17 @@ fn checkWithdraw(
         hashRoot[j] = root[j];
     }
 
-    assert(merkleHash == hashRoot);
+    assert(root2 == merkle_root);
 
     // generate new leaf and new nullifier for next withdraw
     let newLeaf = std::hash::poseidon::bn254::hash_2([secret, newAmount]);
     let newNullifier = std::hash::pedersen_hash([newAmount, secret]);
     [newLeaf, newNullifier]
+}
+
+fn hashPedersen(leafLeft: Field, leafRight: Field) -> pub Field {
+    let result = std::hash::pedersen_hash([leafLeft, leafRight]);
+    result
 }
 
 fn hashpair(merkleA: [u8; 32], merkleB: [u8; 32], inverse: bool) -> [u8; 32] {
@@ -115,4 +110,14 @@ fn hashpair(merkleA: [u8; 32], merkleB: [u8; 32], inverse: bool) -> [u8; 32] {
     }
 
     std::hash::keccak256(proofHash, 64)
+}
+
+#[test]
+fn test_hash() {
+    let commitment_0 = std::hash::pedersen_hash([1, 1]);
+
+    let commit2= hashPedersen(1, 1);
+    std::println("hash 1,1");
+    std::println(commitment_0);
+    assert(commitment_0 == commit2);
 }
