@@ -2,8 +2,9 @@
 pragma solidity ^0.8.19;
 
 import '../circuits/contract/noirstarter/plonk_vk.sol';
+import './MerkleTreeWithHistory.sol';
 
-contract Twister {
+contract Twister is MerkleTreeWithHistory,ReentrancyGuard  {
     uint256 constant FEE = 0.0005 ether;
     uint256 constant MIN_AMOUNT = 0.001 ether;
     uint256 constant DEPTH = 8;
@@ -15,7 +16,7 @@ contract Twister {
     mapping(bytes32 => bool) commitmentUsed;
     UltraVerifier public verifier;
 
-    constructor() {
+    constructor() MerkleTreeWithHistory(16) {
         verifier = new UltraVerifier();
     }
 
