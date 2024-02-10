@@ -3,8 +3,9 @@ pragma solidity ^0.8.19;
 
 import '../circuits/contract/noirstarter/plonk_vk.sol';
 import './MerkleTreeWithHistory.sol';
+import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 
-contract Twister is MerkleTreeWithHistory,ReentrancyGuard  {
+contract Twister is MerkleTreeWithHistory, ReentrancyGuard {
     uint256 constant FEE = 0.0005 ether;
     uint256 constant MIN_AMOUNT = 0.001 ether;
     uint256 constant DEPTH = 8;
@@ -28,7 +29,7 @@ contract Twister is MerkleTreeWithHistory,ReentrancyGuard  {
         return root;
     }
 
-    function deposit(bytes32 _merkleLeaf, bytes calldata _proof) external payable {
+    function deposit(bytes32 _merkleLeaf, bytes calldata _proof) external payable nonReentrant {
         require(msg.value >= MIN_AMOUNT && (msg.value % MIN_AMOUNT) == 0, 'INCORRECT_AMOUNT');
         require(!leafExist[_merkleLeaf], 'LEAF_EXIST');
         leafs[index] = _merkleLeaf;
@@ -47,22 +48,10 @@ contract Twister is MerkleTreeWithHistory,ReentrancyGuard  {
         // need to prove we deposit the correct amount
         try verifier.verify(_proof, _publicInputs) returns (bool success) {
             require(success, 'INVALID_PROOF');
-            computeRoot();
+            _insert(_merkleLeaf);
         } catch {
             revert('INVALID_PROOF');
         }
-    }
-
-    function computeRoot() private {
-        require(index < 2 ** DEPTH, 'MERKLE_ROOT_FULL');
-        // implement compute root
-        bytes32 a = _hashPair(leafs[0], leafs[1]);
-        bytes32 b = _hashPair(leafs[2], leafs[3]);
-        bytes32 c = _hashPair(leafs[4], leafs[5]);
-        bytes32 d = _hashPair(leafs[6], leafs[7]);
-        bytes32 e = _hashPair(a, b);
-        bytes32 f = _hashPair(c, d);
-        root = _hashPair(e, f);
     }
 
     function withdraw(
@@ -75,7 +64,7 @@ contract Twister is MerkleTreeWithHistory,ReentrancyGuard  {
         uint256 _amount,
         bytes calldata _proof,
         bytes calldata _execution
-    ) external {
+    ) external nonReentrant {
         require(_amount >= MIN_AMOUNT && (_amount % MIN_AMOUNT) == 0, 'INCORRECT_AMOUNT');
         require(!commitmentUsed[_nullifier], 'REPLAYED_NULLIFIER');
         require(!leafExist[_merkleLeaf], 'LEAF_EXIST');
@@ -110,21 +99,9 @@ contract Twister is MerkleTreeWithHistory,ReentrancyGuard  {
             // possibility to execute smartcontract like swap
             (bool payed, ) = payable(msg.sender).call{value: amount}(_execution);
             require(payed, 'user payed');
-            computeRoot();
+            _insert(_merkleLeaf);
         } catch {
             revert('INVALID_PROOF');
-        }
-    }
-
-    function _hashPair(bytes32 a, bytes32 b) private pure returns (bytes32) {
-        return _efficientHash(a, b);
-    }
-
-    function _efficientHash(bytes32 a, bytes32 b) private pure returns (bytes32 value) {
-        assembly {
-            mstore(0x00, a)
-            mstore(0x20, b)
-            value := keccak256(0x00, 0x40)
         }
     }
 }
