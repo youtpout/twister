@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import '../circuits/contract/noirstarter/plonk_vk.sol';
 import './MerkleTreeWithHistory.sol';
@@ -20,13 +20,9 @@ contract Twister is MerkleTreeWithHistory, ReentrancyGuard {
         uint32 leafIndex,
         uint256 timestamp
     );
-    event Withdrawal(
-        address indexed to,
-        bytes32 indexed commitment,
-        uint32 leafIndex
-    );
+    event Withdrawal(address indexed to, bytes32 indexed commitment, uint32 leafIndex);
 
-    constructor() MerkleTreeWithHistory(16) {
+    constructor() MerkleTreeWithHistory(15) {
         verifier = new UltraVerifier();
     }
 
@@ -37,6 +33,7 @@ contract Twister is MerkleTreeWithHistory, ReentrancyGuard {
     function deposit(bytes32 _commitment, bytes calldata _proof) external payable nonReentrant {
         require(msg.value >= MIN_AMOUNT && (msg.value % MIN_AMOUNT) == 0, 'INCORRECT_AMOUNT');
         require(!commitments[_commitment], 'The commitment has been submitted');
+        require(_commitment != bytes32(uint256(0)), 'The commitment cant be empty');
         commitments[_commitment] = true;
         bytes32[] memory _publicInputs = new bytes32[](2);
 

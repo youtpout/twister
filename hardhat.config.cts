@@ -26,7 +26,7 @@ subtask(TASK_COMPILE_SOLIDITY).setAction(async (_, { config }, runSuper) => {
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: '0.8.18',
+    version: '0.8.20',
     settings: {
       optimizer: { enabled: true, runs: 5000 },
     },
@@ -51,7 +51,7 @@ const config: HardhatUserConfig = {
     },
   },
   paths: {
-    sources: './circuits/contract/noirstarter',
+    sources: './src',
   },
 };
 

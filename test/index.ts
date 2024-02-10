@@ -24,23 +24,31 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
 
   before(async () => {
     const compiled = await getCircuit('main');
-    const verifierContract = await hre.viem.deployContract('UltraVerifier');
+    const verifierContract = await hre.viem.deployContract('Twister');
 
     const verifierAddr = verifierContract.address;
-    console.log(`Verifier deployed to ${verifierAddr}`);
+    console.log(`Twister deployed to ${verifierAddr}`);
 
     // @ts-ignore
-    const backend = new BarretenbergBackend(compiled.program);
+    const backend = new BarretenbergBackend(compiled.program, { threads: 32 });
     // @ts-ignore
     noir = new Noir(compiled.program, backend);
   });
 
   it('Should generate valid proof for correct input', async () => {
-    const input = { x: 1, y: 2 };
+    const merkleWitness = [];
+    for (let index = 0; index < 16; index++) {
+      merkleWitness.push({
+        hash: Array(32).fill(0),
+        inverse: false
+      });
+
+    }
+    const input = { secret: 1, oldAmount: 100, merkle_proof: merkleWitness, leaf: 0, merkle_root: 0, nullifier: 0, amount: 100, receiver: 0, relayer: 0, deposit: true };
     // Generate proof
     correctProof = await noir.generateFinalProof(input);
     expect(correctProof.proof instanceof Uint8Array).to.be.true;
-  });
+  }).timeout(1000000);
 
   it('Should verify valid proof for correct input', async () => {
     const verification = await noir.verifyFinalProof(correctProof);

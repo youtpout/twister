@@ -1,10 +1,15 @@
 use dep::std;
 
+struct Witness {
+    hash: [u8; 32],
+    inverse: bool
+}
+
 fn main(
     secret: Field,
     oldAmount: Field,
-    // tree with 8 depth for test
-    merkle_proof: [([u8; 32],bool); 8],
+    // tree with 16 depth for test
+    merkle_proof: [Witness; 16],
     leaf: pub Field,
     merkle_root: pub Field,
     nullifier: pub Field,
@@ -19,7 +24,10 @@ fn main(
         assert(oldAmount == amount);
         let newLeaf = std::hash::poseidon::bn254::hash_2([secret, amount]);
         let nullifier = std::hash::pedersen_hash([amount, secret]);
-        assert(newLeaf == leaf);
+        if (leaf != 0) {
+            // verify only if leaf, so we can generate lead in first place and verify it on deposit
+            assert(newLeaf == leaf);
+        }
         result = [newLeaf,nullifier];
     } else {
         // we need to define relayer and receiver to withdraw, relayer and receiver can be the same account
@@ -44,7 +52,7 @@ fn checkWithdraw(
     secret: Field,
     oldAmount: Field,
     leaf: Field,
-    merkle_proof: [([u8; 32],bool); 8],
+    merkle_proof: [Witness; 16],
     merkle_root: Field,
     nullifier: Field,
     amount: Field
@@ -71,9 +79,9 @@ fn checkWithdraw(
         merkleHash[j] = t[j];
     }
 
-    for index in 0 .. merkle_proof {
-        let (mp,inverse) = merkle_proof[index];
-         merkleHash = hashpair(merkleHash,mp,inverse);
+    for index in 0..merkle_proof.len() {
+        let mp = merkle_proof[index];
+        merkleHash = hashpair(merkleHash,mp.hash,mp.inverse);
     }
 
     let root = merkle_root.to_be_bytes(32);
