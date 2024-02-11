@@ -1,5 +1,4 @@
 use dep::std;
-mod generator;
 
 fn main(
     secret: Field,
