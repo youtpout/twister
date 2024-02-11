@@ -30,7 +30,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     console.log(`Twister deployed to ${verifierAddr}`);
 
     // @ts-ignore
-    const backend = new BarretenbergBackend(compiled.program, 32);
+    const backend = new BarretenbergBackend(compiled.program);
     // @ts-ignore
     noir = new Noir(compiled.program, backend);
   });

@@ -79,30 +79,6 @@ fn checkWithdraw(
     [newLeaf, newNullifier]
 }
 
-fn hashPedersen(leafLeft: Field, leafRight: Field) -> pub Field {
-    let result = std::hash::pedersen_hash([leafLeft, leafRight]);
-    result
-}
-
-fn hashpair(merkleA: [u8; 32], merkleB: [u8; 32], inverse: bool) -> [u8; 32] {
-    let mut proofHash :[u8; 64] = [0; 64];
-
-    if (inverse) {
-        for i in 0..merkleA.len() {
-            // use like this to prevent nargo crash
-            proofHash[i+32] = merkleA[i];
-            proofHash[i] = merkleB[i];
-        }
-    } else {
-        for i in 0..merkleA.len() {
-            proofHash[i] = merkleA[i];
-            proofHash[i+32] = merkleB[i];
-        }
-    }
-
-    std::hash::keccak256(proofHash, 64)
-}
-
 // update of noir implementation to use poseidon
 pub fn compute_merkle_root<N>(leaf: Field, index: Field, hash_path: [Field; N]) -> Field {
     let n = hash_path.len();
@@ -118,26 +94,6 @@ pub fn compute_merkle_root<N>(leaf: Field, index: Field, hash_path: [Field; N]) 
         current = std::hash::poseidon::bn254::hash_2([hash_left, hash_right]);
     }
     current
-}
-
-#[test]
-fn test_hash() {
-    let commitment_0 = std::hash::pedersen_hash([1, 1]);
-
-    let commit2= hashPedersen(1, 1);
-    std::println("hash 1,1");
-    std::println(commitment_0);
-    assert(commitment_0 == commit2);
-}
-
-#[test]
-fn test_hash_mimc() {
-    let commitment_0 = std::hash::mimc::mimc_bn254([1, 1]);
-
-    let commit2= hashPedersen(1, 1);
-    std::println("hash mimc 1,1");
-    std::println(commitment_0);
-    //assert(commitment_0 == commit2);
 }
 
 #[test]
