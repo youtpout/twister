@@ -36,7 +36,29 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
   });
 
   it('Should generate valid proof for correct input', async () => {
-    const input = { secret: 1, oldAmount: 100, witnesses: Array(16).fill(0), leaf: 0, leafIndex: 0, merkleRoot: 0, nullifier: 0, amount: 100, receiver: 0, relayer: 0, deposit: true };
+    const zero = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    const secret = 0x0000000000000000000000000000000000000000000000000000000000000001;
+    const hundred = 0x0000000000000000000000000000000000000000000000000000000000000064;
+    const input = {
+      secret: 1,
+      oldAmount: 100,
+      witnesses: Array(16).fill(0),
+      leafIndex: 0,
+      leaf: 0,
+      merkleRoot: 0,
+      nullifier: 0,
+      amount: 100,
+      receiver: 0,
+      relayer: 0,
+      deposit: true
+    };
+
+    const leaf = 0x149ee2a34336978136552210f474ff05c8089726d3212eda41dc386e7f222c53;
+    const nullifier = 0x221e24eef47a71db7759851c68c8652da18b4f09c4769f2d5b8c297fbb83f07b;
+    // get result from proof (leaf,nullifier)
+    // const { witness, returnValue } = await noir.execute(input);
+    // console.log("result", returnValue);
+
     // Generate proof
     correctProof = await noir.generateFinalProof(input);
     expect(correctProof.proof instanceof Uint8Array).to.be.true;

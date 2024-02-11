@@ -102,3 +102,11 @@ fn test_hash_poseidon() {
     std::println("hash poseidon 1,1");
     std::println(hash_2);
 }
+
+#[test]
+fn test_generate_deposit_leaf() {
+    let witnesses: [Field;16] = [0; 16];
+    let result = main(1, 100, witnesses, 0, 0, 0, 0, 100, 0, 0, true);
+    std::println("result deposit");
+    std::println(result);
+}
