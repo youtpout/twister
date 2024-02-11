@@ -43,5 +43,9 @@ contract MerkleTreeTest is Test {
         bytes32 nullifier = 0x1e3c6527094f6f524dcf9a514f823f9c0cdd20fb7f879c7bdf58bd2e7d3e0656;
 
         twister.deposit{value: 0.25 ether}(leaf, proofBytes);
+
+        bytes32 root = twister.getLastRoot();
+        console.log("Last root");
+        console.logBytes32(root);
     }
 }

@@ -105,3 +105,13 @@ fn test_generate_deposit_leaf() {
     std::println("result deposit");
     std::println(result);
 }
+
+#[test]
+fn test_merkle_root() {
+    let witnesses: [Field;16] = [0; 16];
+    let hashSecret = std::hash::poseidon::bn254::hash_2([250000000000000000, 1]);
+    let root = compute_merkle_root(0, 0, witnesses);
+
+    std::println("expected root");
+    std::println(root);
+}

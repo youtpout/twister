@@ -9,7 +9,6 @@ import { join } from 'path';
 import { ProofData } from '@noir-lang/types';
 import { readFileSync } from 'fs';
 import { text } from 'stream/consumers';
-import { ethers, network } from "hardhat";
 
 const getCircuit = async (name: string) => {
   const sourcePath = new URL('../circuits/src/main.nr', import.meta.url);
@@ -42,9 +41,9 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     const compiled = await getCircuit('main');
     const compiledGenerator = await getCircuitGenerator('main');
 
-    verifierContract = await hre.viem.deployContract('UltraVerifier');
-    const verifierAddr = verifierContract.address;
-    console.log(`Verifier deployed to ${verifierAddr}`);
+    const UltraVerifier = await hre.ethers.getContractFactory("UltraVerifier");
+    verifierContract = await UltraVerifier.deploy();
+    console.log(`Verifier deployed to ${verifierContract.address}`);
 
     // @ts-ignore
     const backend = new BarretenbergBackend(compiled.program);
@@ -74,7 +73,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
       leafIndex: 0,
       leaf: returnValue[0],
       merkleRoot: 0,
-      nullifier: returnValue[1],
+      nullifier: 0,
       amount: 250000000000000000,
       receiver: 0,
       relayer: 0,
@@ -91,7 +90,15 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
   it('Should verify valid proof for correct input', async () => {
     const verification = await noir.verifyFinalProof(correctProof);
     expect(verification).to.be.true;
-    const tx = await verifierContract.verify(correctProof.proof, correctProof.publicInputs);
+    const abi = hre.ethers.AbiCoder.defaultAbiCoder();
+    const publicInputs = Array(7).fill("0x0000000000000000000000000000000000000000000000000000000000000000");
+    publicInputs[0] = "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf";
+    publicInputs[3] = "0x00000000000000000000000000000000000000000000000003782dace9d90000";
+    publicInputs[6] = "0x0000000000000000000000000000000000000000000000000000000000000001";
+    const params = abi.encode(
+      ["bytes32[]"], // encode as address array
+      [publicInputs]);
+    const tx = await verifierContract.verify(correctProof.proof, params);
     await tx.wait();
 
   });
