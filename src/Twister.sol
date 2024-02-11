@@ -35,7 +35,7 @@ contract Twister is MerkleTreeWithHistory, ReentrancyGuard {
         require(!commitments[_commitment], 'The commitment has been submitted');
         require(_commitment != bytes32(uint256(0)), 'The commitment cant be empty');
         commitments[_commitment] = true;
-        bytes32[] memory _publicInputs = new bytes32[](9);
+        bytes32[] memory _publicInputs = new bytes32[](7);
 
         _publicInputs[0] = _commitment;
         _publicInputs[1] = bytes32(0);
@@ -44,9 +44,6 @@ contract Twister is MerkleTreeWithHistory, ReentrancyGuard {
         _publicInputs[4] = bytes32(0);
         _publicInputs[5] = bytes32(0);
         _publicInputs[6] = bytes32(uint256(1));
-        _publicInputs[7] = bytes32(0);
-        _publicInputs[8] = bytes32(0);
-
         // need to prove we deposit the correct amount
         try verifier.verify(_proof, _publicInputs) returns (bool success) {
             require(success, 'INVALID_PROOF');
@@ -80,7 +77,7 @@ contract Twister is MerkleTreeWithHistory, ReentrancyGuard {
         nullifierHashes[_nullifierHash] = true;
         commitments[_commitment] = true;
 
-        bytes32[] memory _publicInputs = new bytes32[](9);
+        bytes32[] memory _publicInputs = new bytes32[](7);
 
         _publicInputs[0] = _commitment;
         _publicInputs[1] = _root;
@@ -89,8 +86,6 @@ contract Twister is MerkleTreeWithHistory, ReentrancyGuard {
         _publicInputs[4] = bytes32(uint256(uint160(_receiver)));
         _publicInputs[5] = bytes32(uint256(uint160(_relayer)));
         _publicInputs[6] = bytes32(0);
-        _publicInputs[7] = bytes32(0);
-        _publicInputs[8] = bytes32(0);
 
         try verifier.verify(_proof, _publicInputs) returns (bool success) {
             require(success, 'INVALID_PROOF');
