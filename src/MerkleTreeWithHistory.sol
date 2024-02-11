@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+import 'poseidon-solidity/PoseidonT3.sol';
 
 // From a popular climatic event
 contract MerkleTreeWithHistory {
@@ -30,13 +31,9 @@ contract MerkleTreeWithHistory {
 
     /**
     @dev Hash 2 tree leaves
-  */
+    */
     function hashLeftRight(bytes32 _left, bytes32 _right) public pure returns (bytes32 value) {
-        assembly {
-            mstore(0x00, _left)
-            mstore(0x20, _right)
-            value := keccak256(0x00, 0x40)
-        }
+        value = bytes32(PoseidonT3.hash([uint256(_left), uint256(_right)]));
     }
 
     function _insert(bytes32 _leaf) internal returns (uint32 index) {
@@ -98,40 +95,39 @@ contract MerkleTreeWithHistory {
         return roots[currentRootIndex];
     }
 
-    /// @dev provides Zero (Empty) elements for a keccak256 MerkleTree. Up to 16 levels
+    /// @dev provides Zero (Empty) elements for a poseidon MerkleTree. Up to 16 levels
     function zeros(uint256 i) public pure returns (bytes32) {
-        if (i == 0)
-            return bytes32(0);
+        if (i == 0) return bytes32(0);
         else if (i == 1)
-            return bytes32(0xad3228b676f7d3cd4284a5443f17f1962b36e491b30a40b2405849e597ba5fb5);
+            return bytes32(0x2098f5fb9e239eab3ceac3f27b81e481dc3124d55ffed523a839ee8446b64864);
         else if (i == 2)
-            return bytes32(0xb4c11951957c6f8f642c4af61cd6b24640fec6dc7fc607ee8206a99e92410d30);
+            return bytes32(0x1069673dcdb12263df301a6ff584a7ec261a44cb9dc68df067a4774460b1f1e1);
         else if (i == 3)
-            return bytes32(0x21ddb9a356815c3fac1026b6dec5df3124afbadb485c9ba5a3e3398a04b7ba85);
+            return bytes32(0x18f43331537ee2af2e3d758d50f72106467c6eea50371dd528d57eb2b856d238);
         else if (i == 4)
-            return bytes32(0xe58769b32a1beaf1ea27375a44095a0d1fb664ce2dd358e7fcbfb78c26a19344);
+            return bytes32(0x07f9d837cb17b0d36320ffe93ba52345f1b728571a568265caac97559dbc952a);
         else if (i == 5)
-            return bytes32(0x0eb01ebfc9ed27500cd4dfc979272d1f0913cc9f66540d7e8005811109e1cf2d);
+            return bytes32(0x2b94cf5e8746b3f5c9631f4c5df32907a699c58c94b2ad4d7b5cec1639183f55);
         else if (i == 6)
-            return bytes32(0x887c22bd8750d34016ac3c66b5ff102dacdd73f6b014e710b51e8022af9a1968);
+            return bytes32(0x2dee93c5a666459646ea7d22cca9e1bcfed71e6951b953611d11dda32ea09d78);
         else if (i == 7)
-            return bytes32(0xffd70157e48063fc33c97a050f7f640233bf646cc98d9524c6b92bcf3ab56f83);
+            return bytes32(0x078295e5a22b84e982cf601eb639597b8b0515a88cb5ac7fa8a4aabe3c87349d);
         else if (i == 8)
-            return bytes32(0x9867cc5f7f196b93bae1e27e6320742445d290f2263827498b54fec539f756af);
+            return bytes32(0x2fa5e5f18f6027a6501bec864564472a616b2e274a41211a444cbe3a99f3cc61);
         else if (i == 9)
-            return bytes32(0xcefad4e508c098b9a7e1d8feb19955fb02ba9675585078710969d3440f5054e0);
+            return bytes32(0x0e884376d0d8fd21ecb780389e941f66e45e7acce3e228ab3e2156a614fcd747);
         else if (i == 10)
-            return bytes32(0xf9dc3e7fe016e050eff260334f18a5d4fe391d82092319f5964f2e2eb7c1c3a5);
+            return bytes32(0x1b7201da72494f1e28717ad1a52eb469f95892f957713533de6175e5da190af2);
         else if (i == 11)
-            return bytes32(0xf8b13a49e282f609c317a833fb8d976d11517c571d1221a265d25af778ecf892);
+            return bytes32(0x1f8d8822725e36385200c0b201249819a6e6e1e4650808b5bebc6bface7d7636);
         else if (i == 12)
-            return bytes32(0x3490c6ceeb450aecdc82e28293031d10c7d73bf85e57bf041a97360aa2c5d99c);
+            return bytes32(0x2c5d82f66c914bafb9701589ba8cfcfb6162b0a12acf88a8d0879a0471b5f85a);
         else if (i == 13)
-            return bytes32(0xc1df82d9c4b87413eae2ef048f94b4d3554cea73d92b0f7af96e0271c691e2bb);
+            return bytes32(0x14c54148a0940bb820957f5adf3fa1134ef5c4aaa113f4646458f270e0bfbfd0);
         else if (i == 14)
-            return bytes32(0x5c67add7c6caf302256adedf7ab114da0acfe870d449a3a489f781d659e8becc);
+            return bytes32(0x190d33b12f986f961e10c0ee44d8b9af11be25588cad89d416118e4bf4ebe80c);
         else if (i == 15)
-            return bytes32(0xda7bce9f4e8618b6bd2f4132ce798cdc7a60e7e1460a7299e3c6342a579626d2);
+            return bytes32(0x2a7c7c9b6ce5880b9f6f228d72bf6a575a526f29c66ecceef8b753d38bba7323);
         else revert('Index out of bounds');
     }
 }

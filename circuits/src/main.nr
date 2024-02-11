@@ -5,8 +5,8 @@ fn main(
     oldAmount: Field,
     // tree with 16 depth for test
     witnesses: [Field; 16],
+    leafIndex: Field,
     leaf: pub Field,
-    leafIndex: pub Field,
     merkleRoot: pub Field,
     nullifier: pub Field,
     amount: pub Field,

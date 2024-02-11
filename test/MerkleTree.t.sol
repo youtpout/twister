@@ -18,11 +18,16 @@ contract MerkleTreeTest is Test {
     function testMerkleTreeZero() public {
         bytes32 value = bytes32(uint256(0));
         for (uint256 index = 0; index < 16; index++) {
-            value = hashLeftRight(value, value);
+            value = hashLeftRightPoseidon(value, value);
             console.log('result hash');
             console.logBytes32(value);
         }
     }
+
+    function hashLeftRightPoseidon(bytes32 _left, bytes32 _right) public pure returns (bytes32 value) {
+        value = bytes32(PoseidonT3.hash([uint256(_left), uint256(_right)]));
+    }
+
 
     function hashLeftRight(bytes32 _left, bytes32 _right) public pure returns (bytes32 value) {
         assembly {
