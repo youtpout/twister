@@ -22,7 +22,7 @@ contract Twister is MerkleTreeWithHistory, ReentrancyGuard {
     );
     event Withdrawal(address indexed to, bytes32 indexed commitment, uint32 leafIndex);
 
-    constructor() MerkleTreeWithHistory(15) {
+    constructor() MerkleTreeWithHistory(3) {
         verifier = new UltraVerifier();
     }
 

@@ -19,7 +19,7 @@ contract MerkleTreeTest is Test {
         bytes32 value = bytes32(uint256(0));
         for (uint256 index = 0; index < 16; index++) {
             value = hashLeftRightPoseidon(value, value);
-            console.log('result hash');
+            console.log(',');
             console.logBytes32(value);
         }
     }

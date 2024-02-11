@@ -69,7 +69,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     let input = {
       secret: 1,
       oldAmount: 250000000000000000,
-      witnesses: Array(16).fill(0),
+      witnesses: Array(15).fill(0),
       leafIndex: 0,
       leaf: returnValue[0],
       merkleRoot: 0,

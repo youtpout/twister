@@ -45,7 +45,7 @@ contract MerkleTreeTest is Test {
         twister.deposit{value: 0.25 ether}(leaf, proofBytes);
 
         bytes32 root = twister.getLastRoot();
-        console.log("Last root");
+        console.log('Last root');
         console.logBytes32(root);
     }
 }
