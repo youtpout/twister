@@ -12,10 +12,10 @@ fn main(
     amount: pub Field,
     receiver: pub Field,
     relayer: pub Field,
-    deposit: pub bool
+    deposit: pub Field
 ) -> pub [Field; 2] {
     let mut result:[Field; 2] = [0; 2];
-    if deposit {
+    if deposit == 1 {
         // we check on deposit if the user deposit the correct amount of eth
         assert(oldAmount == amount);
         let newLeaf = std::hash::poseidon::bn254::hash_2([secret, amount]);
@@ -106,7 +106,19 @@ fn test_hash_poseidon() {
 #[test]
 fn test_generate_deposit_leaf() {
     let witnesses: [Field;16] = [0; 16];
-    let result = main(1, 100, witnesses, 0, 0, 0, 0, 100, 0, 0, true);
+    let result = main(
+        1,
+        250000000000000000,
+        witnesses,
+        0,
+        0,
+        0,
+        0,
+        250000000000000000,
+        0,
+        0,
+        1
+    );
     std::println("result deposit");
     std::println(result);
 }

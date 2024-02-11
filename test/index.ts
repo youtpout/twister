@@ -24,10 +24,10 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
 
   before(async () => {
     const compiled = await getCircuit('main');
-    const verifierContract = await hre.viem.deployContract('Twister');
+    /*const verifierContract = await hre.viem.deployContract('Twister');
 
     const verifierAddr = verifierContract.address;
-    console.log(`Twister deployed to ${verifierAddr}`);
+    console.log(`Twister deployed to ${verifierAddr}`);*/
 
     // @ts-ignore
     const backend = new BarretenbergBackend(compiled.program);
@@ -39,27 +39,31 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     const zero = 0x0000000000000000000000000000000000000000000000000000000000000000;
     const secret = 0x0000000000000000000000000000000000000000000000000000000000000001;
     const hundred = 0x0000000000000000000000000000000000000000000000000000000000000064;
-    const input = {
+    let input = {
       secret: 1,
-      oldAmount: 100,
+      oldAmount: 250000000000000000,
       witnesses: Array(16).fill(0),
       leafIndex: 0,
       leaf: 0,
       merkleRoot: 0,
       nullifier: 0,
-      amount: 100,
+      amount: 250000000000000000,
       receiver: 0,
       relayer: 0,
       deposit: true
     };
 
-    const leaf = 0x149ee2a34336978136552210f474ff05c8089726d3212eda41dc386e7f222c53;
-    const nullifier = 0x221e24eef47a71db7759851c68c8652da18b4f09c4769f2d5b8c297fbb83f07b;
+    const leaf = 0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf;
+    const nullifier = 0x1e3c6527094f6f524dcf9a514f823f9c0cdd20fb7f879c7bdf58bd2e7d3e0656;
     // get result from proof (leaf,nullifier)
-    // const { witness, returnValue } = await noir.execute(input);
-    // console.log("result", returnValue);
+    const { witness, returnValue } = await noir.execute(input);
+    console.log("returnValue", returnValue);
+    // expect(returnValue[0]).equal("0x149ee2a34336978136552210f474ff05c8089726d3212eda41dc386e7f222c53");
+    //expect(returnValue[1]).equal("0x221e24eef47a71db7759851c68c8652da18b4f09c4769f2d5b8c297fbb83f07b");
 
     // Generate proof
+    //input.nullifier = nullifier;
+    //input.leaf = leaf;
     correctProof = await noir.generateFinalProof(input);
     expect(correctProof.proof instanceof Uint8Array).to.be.true;
   }).timeout(1000000);

@@ -19,7 +19,7 @@ contract MerkleTreeWithHistory {
 
     constructor(uint32 _levels) {
         require(_levels > 0, '_levels should be greater than zero');
-        require(_levels < 16, '_levels should be less than 16');
+        require(_levels < 32, '_levels should be less than 32');
         levels = _levels;
 
         for (uint32 i = 0; i < _levels; i++) {
