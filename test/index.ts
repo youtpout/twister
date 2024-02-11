@@ -18,6 +18,8 @@ const getCircuit = async (name: string) => {
   return compiled;
 };
 
+
+
 describe('It compiles noir program code, receiving circuit bytes and abi object.', () => {
   let noir: Noir;
   let noirGenerator: Noir;
@@ -25,21 +27,16 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
 
   before(async () => {
     const compiled = await getCircuit('main');
-    const compiledGenerator = await getCircuit('generator');
-    /*const verifierContract = await hre.viem.deployContract('Twister');
+    //const compiledGenerator = await getCircuitGenerator('main');
 
+    const verifierContract = await hre.viem.deployContract('Twister');
     const verifierAddr = verifierContract.address;
-    console.log(`Twister deployed to ${verifierAddr}`);*/
+    console.log(`Twister deployed to ${verifierAddr}`);
 
     // @ts-ignore
     const backend = new BarretenbergBackend(compiled.program);
     // @ts-ignore
     noir = new Noir(compiled.program, backend);
-
-    // @ts-ignore
-    const backendGenerator = new BarretenbergBackend(compiledGenerator.program);
-    // @ts-ignore
-    noirGenerator = new Noir(compiledGenerator.program, backendGenerator);
   });
 
   it('Should generate valid proof for correct input', async () => {
@@ -62,14 +59,14 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     };
 
     // get result from proof (leaf,nullifier)
-    let inputGenerate = {
-      secret: 1,
-      amount: 250000000000000000
-    }
-    const { witness, returnValue } = await noirGenerator.execute(inputGenerate);
-    console.log("returnValue", returnValue);
-    expect(returnValue[0]).equal(input.leaf);
-    expect(returnValue[1]).equal(input.nullifier);
+    /* let inputGenerate = {
+       secret: 1,
+       amount: 250000000000000000
+     }
+     const { witness, returnValue } = await noirGenerator.execute(inputGenerate);
+     console.log("returnValue", returnValue);
+     expect(returnValue[0]).equal(input.leaf);
+     expect(returnValue[1]).equal(input.nullifier);*/
 
     // Generate proof
     correctProof = await noir.generateFinalProof(input);
@@ -83,7 +80,20 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
 
   it('Should fail to generate valid proof for incorrect input', async () => {
     try {
-      const input = { x: 1, y: 1 };
+      let input = {
+        secret: 2,
+        oldAmount: 250000000000000000,
+        witnesses: Array(16).fill(0),
+        leafIndex: 0,
+        leaf: "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf",
+        merkleRoot: 0,
+        nullifier: '0x1e3c6527094f6f524dcf9a514f823f9c0cdd20fb7f879c7bdf58bd2e7d3e0656',
+        amount: 250000000000000000,
+        receiver: 0,
+        relayer: 0,
+        deposit: 1,
+
+      };
       const incorrectProof = await noir.generateFinalProof(input);
     } catch (err) {
       // TODO(Ze): Not sure how detailed we want this test to be

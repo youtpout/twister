@@ -1,4 +1,5 @@
 use dep::std;
+mod generator;
 
 fn main(
     secret: Field,
@@ -13,36 +14,21 @@ fn main(
     receiver: pub Field,
     relayer: pub Field,
     deposit: pub Field
-) -> pub [Field; 2] {
-    let mut result:[Field; 2] = [0; 2];
+) {
     if deposit == 1 {
         // we check on deposit if the user deposit the correct amount of eth
         assert(oldAmount == amount);
         let newLeaf = std::hash::poseidon::bn254::hash_2([secret, amount]);
-        let nullifier = std::hash::pedersen_hash([amount, secret]);
         if (leaf != 0) {
             // verify only if leaf, so we can generate lead in first place and verify it on deposit
             assert(newLeaf == leaf);
         }
-        result = [newLeaf,nullifier];
     } else {
         // we need to define relayer and receiver to withdraw, relayer and receiver can be the same account
         assert(receiver != 0);
         assert(relayer != 0);
-        result = checkWithdraw(
-            secret,
-            oldAmount,
-            leaf,
-            leafIndex,
-            witnesses,
-            merkleRoot,
-            nullifier,
-            amount
-        );
+        checkWithdraw(secret, oldAmount, leaf, leafIndex, witnesses, merkleRoot, nullifier, amount);
     }
-
-    // for each proof we generate new leaf and nullifier for next withdraw
-    result
 }
 
 fn checkWithdraw(
@@ -54,7 +40,7 @@ fn checkWithdraw(
     merkleRoot: Field,
     nullifier: Field,
     amount: Field
-) -> [Field; 2] {
+) {
     let hash_secretNullifer = std::hash::pedersen_hash([secret, oldAmount]);
     assert(nullifier == hash_secretNullifer);
 
@@ -68,19 +54,17 @@ fn checkWithdraw(
 
     // check if leaf match secret and amount
     let hashSecret = std::hash::poseidon::bn254::hash_2([oldAmount, secret]);
-    assert(hashSecret == leaf);
 
-    let root = compute_merkle_root(leaf, leafIndex, witnesses);
+    let root = compute_merkle_root(hashSecret, leafIndex, witnesses);
     assert(root == merkleRoot);
 
-    // generate new leaf and new nullifier for next withdraw
+    // generate new leaf for next withdraw
     let newLeaf = std::hash::poseidon::bn254::hash_2([secret, newAmount]);
-    let newNullifier = std::hash::pedersen_hash([newAmount, secret]);
-    [newLeaf, newNullifier]
+    assert(newLeaf == leaf);
 }
 
 // update of noir implementation to use poseidon
-pub fn compute_merkle_root<N>(leaf: Field, index: Field, hash_path: [Field; N]) -> Field {
+fn compute_merkle_root<N>(leaf: Field, index: Field, hash_path: [Field; N]) -> Field {
     let n = hash_path.len();
     let index_bits = index.to_le_bits(n as u32);
     let mut current = leaf;
