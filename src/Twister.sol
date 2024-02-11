@@ -3,9 +3,8 @@ pragma solidity ^0.8.20;
 
 import '../circuits/contract/noirstarter/plonk_vk.sol';
 import './MerkleTreeWithHistory.sol';
-import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 
-contract Twister is MerkleTreeWithHistory, ReentrancyGuard {
+contract Twister is MerkleTreeWithHistory {
     uint256 constant FEE = 0.0005 ether;
     uint256 constant MIN_AMOUNT = 0.001 ether;
 
@@ -13,6 +12,7 @@ contract Twister is MerkleTreeWithHistory, ReentrancyGuard {
     // we store all commitments just to prevent accidental deposits with the same commitment
     mapping(bytes32 => bool) public commitments;
     UltraVerifier public verifier;
+    uint32 unlocked;
 
     event Deposit(
         address indexed depositor,
@@ -22,15 +22,28 @@ contract Twister is MerkleTreeWithHistory, ReentrancyGuard {
     );
     event Withdrawal(address indexed to, bytes32 indexed commitment, uint32 leafIndex);
 
+    error Locked();
+
+    // reentrancy guard
+    modifier lock() {
+        if (unlocked == 0) {
+            revert Locked();
+        }
+        unlocked = 0;
+        _;
+        unlocked = 1;
+    }
+
     constructor() MerkleTreeWithHistory(3) {
         verifier = new UltraVerifier();
+        unlocked = 1;
     }
 
     function merkleLeaf(uint256 _index) external view returns (bytes32) {
         return filledSubtrees[_index];
     }
 
-    function deposit(bytes32 _commitment, bytes calldata _proof) external payable nonReentrant {
+    function deposit(bytes32 _commitment, bytes calldata _proof) external payable lock {
         require(msg.value >= MIN_AMOUNT && (msg.value % MIN_AMOUNT) == 0, 'INCORRECT_AMOUNT');
         require(!commitments[_commitment], 'The commitment has been submitted');
         require(_commitment != bytes32(uint256(0)), 'The commitment cant be empty');
@@ -64,7 +77,7 @@ contract Twister is MerkleTreeWithHistory, ReentrancyGuard {
         uint256 _amount,
         bytes calldata _proof,
         bytes calldata _execution
-    ) external nonReentrant {
+    ) external lock {
         require(_amount >= MIN_AMOUNT && (_amount % MIN_AMOUNT) == 0, 'INCORRECT_AMOUNT');
         require(!commitments[_commitment], 'The commitment has been submitted');
         require(!nullifierHashes[_nullifierHash], 'The note has been already spent');

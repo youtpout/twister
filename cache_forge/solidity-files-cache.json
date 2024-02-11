@@ -940,47 +940,6 @@
         }
       }
     },
-    "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol": {
-      "lastModificationDate": 1707680959271,
-      "contentHash": "a92331adac11b453a4de0323fc948119",
-      "sourceName": "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "useLiteralContent": false,
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "^0.8.20",
-      "artifacts": {
-        "ReentrancyGuard": {
-          "0.8.21+commit.d9974bed.Darwin.appleclang": "ReentrancyGuard.sol/ReentrancyGuard.json"
-        }
-      }
-    },
     "node_modules/poseidon-solidity/PoseidonT3.sol": {
       "lastModificationDate": 1707680981115,
       "contentHash": "88a3db6023abdf06f44823c05f81f69e",
@@ -1064,8 +1023,8 @@
       }
     },
     "src/MerkleTreeWithHistory.sol": {
-      "lastModificationDate": 1707683852160,
-      "contentHash": "65a409b9f3f026e6abe7f3ddf89c3513",
+      "lastModificationDate": 1707684949237,
+      "contentHash": "1bd007a05926d0d05f57b0fdf7443518",
       "sourceName": "src/MerkleTreeWithHistory.sol",
       "solcConfig": {
         "settings": {
@@ -1191,8 +1150,8 @@
       }
     },
     "src/Twister.sol": {
-      "lastModificationDate": 1707683022422,
-      "contentHash": "6b81d7600ddd005e6d697b782e333e04",
+      "lastModificationDate": 1707685285807,
+      "contentHash": "904a58fbdcceb6eda8be02b3db5215ad",
       "sourceName": "src/Twister.sol",
       "solcConfig": {
         "settings": {
@@ -1225,7 +1184,6 @@
       },
       "imports": [
         "circuits/contract/noirstarter/plonk_vk.sol",
-        "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol",
         "node_modules/poseidon-solidity/PoseidonT3.sol",
         "src/MerkleTreeWithHistory.sol"
       ],
@@ -1401,7 +1359,6 @@
         "lib/forge-std/src/mocks/MockERC20.sol",
         "lib/forge-std/src/mocks/MockERC721.sol",
         "lib/forge-std/src/safeconsole.sol",
-        "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol",
         "node_modules/poseidon-solidity/PoseidonT3.sol",
         "src/MerkleTreeWithHistory.sol",
         "src/Twister.sol",
