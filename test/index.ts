@@ -8,6 +8,8 @@ import { compile, PathToFileSourceMap } from '@noir-lang/noir_wasm';
 import { join } from 'path';
 import { ProofData } from '@noir-lang/types';
 import { readFileSync } from 'fs';
+import { text } from 'stream/consumers';
+import { ethers, network } from "hardhat";
 
 const getCircuit = async (name: string) => {
   const sourcePath = new URL('../circuits/src/main.nr', import.meta.url);
@@ -34,12 +36,13 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
   let noir: Noir;
   let noirGenerator: Noir;
   let correctProof: ProofData;
+  let verifierContract: any;
 
   before(async () => {
     const compiled = await getCircuit('main');
     const compiledGenerator = await getCircuitGenerator('main');
 
-    const verifierContract = await hre.viem.deployContract('UltraVerifier');
+    verifierContract = await hre.viem.deployContract('UltraVerifier');
     const verifierAddr = verifierContract.address;
     console.log(`Verifier deployed to ${verifierAddr}`);
 
@@ -82,11 +85,15 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     // Generate proof
     correctProof = await noir.generateFinalProof(input);
     expect(correctProof.proof instanceof Uint8Array).to.be.true;
+    console.log("proof public inputs", correctProof.publicInputs);
   }).timeout(1000000);
 
   it('Should verify valid proof for correct input', async () => {
     const verification = await noir.verifyFinalProof(correctProof);
     expect(verification).to.be.true;
+    const tx = await verifierContract.verify(correctProof.proof, correctProof.publicInputs);
+    await tx.wait();
+
   });
 
   it('Should fail to generate valid proof for incorrect input', async () => {
