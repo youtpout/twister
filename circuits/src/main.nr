@@ -1,17 +1,13 @@
 use dep::std;
 
-struct Witness {
-    hash: [u8; 32],
-    inverse: bool
-}
-
 fn main(
     secret: Field,
     oldAmount: Field,
-    // tree with 8 depth for test
-    merkle_proof: [Witness; 8],
+    // tree with 16 depth for test
+    witnesses: [Field; 16],
     leaf: pub Field,
-    merkle_root: pub Field,
+    leafIndex: pub Field,
+    merkleRoot: pub Field,
     nullifier: pub Field,
     amount: pub Field,
     receiver: pub Field,
@@ -37,8 +33,9 @@ fn main(
             secret,
             oldAmount,
             leaf,
-            merkle_proof,
-            merkle_root,
+            leafIndex,
+            witnesses,
+            merkleRoot,
             nullifier,
             amount
         );
@@ -52,8 +49,9 @@ fn checkWithdraw(
     secret: Field,
     oldAmount: Field,
     leaf: Field,
-    merkle_proof: [Witness; 8],
-    merkle_root: Field,
+    leafIndex: Field,
+    witnesses: [Field; 16],
+    merkleRoot: Field,
     nullifier: Field,
     amount: Field
 ) -> [Field; 2] {
@@ -69,18 +67,11 @@ fn checkWithdraw(
     let newAmount = oldAmount - amount;
 
     // check if leaf match secret and amount
-    let hash_secret = std::hash::poseidon::bn254::hash_2([oldAmount, secret]);
-    assert(hash_secret == leaf);
+    let hashSecret = std::hash::poseidon::bn254::hash_2([oldAmount, secret]);
+    assert(hashSecret == leaf);
 
-    let root2 = std::merkle::compute_merkle_root(leaf, 0, [0, 0]);
-
-    let root = merkle_root.to_be_bytes(32);
-    let mut hashRoot:[u8; 32] = [0; 32];
-    for j in 0..32 {
-        hashRoot[j] = root[j];
-    }
-
-    assert(root2 == merkle_root);
+    let root = compute_merkle_root(leaf, leafIndex, witnesses);
+    assert(root == merkleRoot);
 
     // generate new leaf and new nullifier for next withdraw
     let newLeaf = std::hash::poseidon::bn254::hash_2([secret, newAmount]);
@@ -112,6 +103,23 @@ fn hashpair(merkleA: [u8; 32], merkleB: [u8; 32], inverse: bool) -> [u8; 32] {
     std::hash::keccak256(proofHash, 64)
 }
 
+// update of noir implementation to use poseidon
+pub fn compute_merkle_root<N>(leaf: Field, index: Field, hash_path: [Field; N]) -> Field {
+    let n = hash_path.len();
+    let index_bits = index.to_le_bits(n as u32);
+    let mut current = leaf;
+    for i in 0..n {
+        let path_bit = index_bits[i] as bool;
+        let (hash_left, hash_right) = if path_bit {
+            (hash_path[i], current)
+        } else {
+            (current, hash_path[i])
+        };
+        current = std::hash::poseidon::bn254::hash_2([hash_left, hash_right]);
+    }
+    current
+}
+
 #[test]
 fn test_hash() {
     let commitment_0 = std::hash::pedersen_hash([1, 1]);
@@ -120,4 +128,21 @@ fn test_hash() {
     std::println("hash 1,1");
     std::println(commitment_0);
     assert(commitment_0 == commit2);
+}
+
+#[test]
+fn test_hash_mimc() {
+    let commitment_0 = std::hash::mimc::mimc_bn254([1, 1]);
+
+    let commit2= hashPedersen(1, 1);
+    std::println("hash mimc 1,1");
+    std::println(commitment_0);
+    //assert(commitment_0 == commit2);
+}
+
+#[test]
+fn test_hash_poseidon() {
+    let hash_2 = std::hash::poseidon::bn254::hash_2([1, 1]);
+    std::println("hash poseidon 1,1");
+    std::println(hash_2);
 }

@@ -30,21 +30,13 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     console.log(`Twister deployed to ${verifierAddr}`);
 
     // @ts-ignore
-    const backend = new BarretenbergBackend(compiled.program);
+    const backend = new BarretenbergBackend(compiled.program, 32);
     // @ts-ignore
     noir = new Noir(compiled.program, backend);
   });
 
   it('Should generate valid proof for correct input', async () => {
-    const merkleWitness = [];
-    for (let index = 0; index < 8; index++) {
-      merkleWitness.push({
-        hash: Array(32).fill(0),
-        inverse: false
-      });
-
-    }
-    const input = { secret: 1, oldAmount: 100, merkle_proof: merkleWitness, leaf: 0, merkle_root: 0, nullifier: 0, amount: 100, receiver: 0, relayer: 0, deposit: true };
+    const input = { secret: 1, oldAmount: 100, witnesses: Array(16).fill(0), leaf: 0, leafIndex: 0, merkleRoot: 0, nullifier: 0, amount: 100, receiver: 0, relayer: 0, deposit: true };
     // Generate proof
     correctProof = await noir.generateFinalProof(input);
     expect(correctProof.proof instanceof Uint8Array).to.be.true;
