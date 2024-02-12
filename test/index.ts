@@ -33,6 +33,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
   let noirGenerator: Noir;
   let correctProof: ProofData;
   let verifierContract: Twister;
+  let witnessMerkle;
 
   before(async () => {
     const compiled = await getCircuit('main');
@@ -99,9 +100,9 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
       concatenator: fnConc
     });
     const root = merkleTree.getHexRoot();
-    const witness = merkleTree.getHexProof("0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf");
+    witnessMerkle = merkleTree.getHexProof("0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf");
     console.log("root", root);
-    console.log("witness", witness.map(x => BigInt(x)));
+    console.log("witness", witnessMerkle.map(x => BigInt(x)));
   });
 
   it('Should generate valid proof for correct input', async () => {
@@ -154,34 +155,33 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     // get result from proof (leaf,nullifier)
     let inputGenerate = {
       secret: 1,
-      amount: 150000000000000000
+      amount: 250000000000000000
     }
     const { witness, returnValue } = await noirGenerator.execute(inputGenerate);
-    console.log("returnValue", returnValue);
 
-    var bn = BigInt(returnValue[0]);
-    var d = bn.toString(10);
-    console.log("decimal", d);
+    inputGenerate.amount = 150000000000000000;
+    const { witness2, returnValue2 } = await noirGenerator.execute(inputGenerate);
+
+    const root = verifierContract.getLastRoot();
 
     let input = {
       secret: 1,
       oldAmount: 250000000000000000,
-      witnesses: Array(8).fill(0),
+      witnesses: witnessMerkle,
       leafIndex: 0,
-      leaf: "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf",
-      merkleRoot: 0,
-      nullifier: 0,
+      leaf: returnValue2[0],
+      merkleRoot: root,
+      nullifier: returnValue[1],
       amount: 100000000000000000,
-      receiver: 0,
-      relayer: 0,
-      deposit: 1
+      receiver: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      relayer: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      deposit: 0
     };
 
 
     // Generate proof
-    correctProof = await noir.generateFinalProof(input);
-    expect(correctProof.proof instanceof Uint8Array).to.be.true;
-    console.log("proof public inputs", correctProof.publicInputs);
+    const withdrawProof = await noir.generateFinalProof(input);
+    verifierContract.withdraw(input.nullifier, input.leaf, root, input.receiver, input.receiver, input.amount, withdrawProof.proof, "");
   }).timeout(1000000);
 
   it('Should fail to generate valid proof for incorrect input', async () => {
