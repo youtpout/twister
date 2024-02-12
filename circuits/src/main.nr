@@ -4,7 +4,7 @@ fn main(
     secret: Field,
     oldAmount: Field,
     // tree with 8 depth for test, 7 witness
-    witnesses: [Field; 7],
+    witnesses: [Field; 8],
     leafIndex: Field,
     leaf: pub Field,
     merkleRoot: pub Field,
@@ -35,7 +35,7 @@ fn checkWithdraw(
     oldAmount: Field,
     leaf: Field,
     leafIndex: Field,
-    witnesses: [Field; 7],
+    witnesses: [Field; 8],
     merkleRoot: Field,
     nullifier: Field,
     amount: Field
@@ -90,7 +90,7 @@ fn test_hash_poseidon() {
 
 #[test]
 fn test_generate_deposit_leaf() {
-    let witnesses: [Field;7] = [0; 7];
+    let witnesses: [Field;8] = [0; 8];
     let result = main(
         1,
         250000000000000000,

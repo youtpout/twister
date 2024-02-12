@@ -73,7 +73,7 @@ contract TwisterTest is Test {
         console.logBytes32(root);
 
         bytes32 newleaf = 0x2558278ff77b5d4835c9496b4be5e058c898104dc11b5d76f66790131ed3d6dc;
-        bytes32 mRoot = 0x20bd0c854ac437cb8bf30017fa0abdedc37afe250e59e947df15a758c99fa455;
+        bytes32 mRoot = 0x0c992ddbba46b97652c6d903c593930507fbae5ac018271c04c57c84ea72bf02;
         address receiver = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
         uint256 amount = 0.1 ether;
         twister.withdraw(
