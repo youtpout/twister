@@ -61,14 +61,11 @@ contract Twister is MerkleTreeWithHistory {
         _publicInputs[4] = bytes32(0);
         _publicInputs[5] = bytes32(0);
         _publicInputs[6] = bytes32(uint256(1));
+
         // need to prove we deposit the correct amount
-        try verifier.verify(_proof, _publicInputs) returns (bool success) {
-            require(success, 'INVALID_PROOF_DEPOSIT');
-            uint32 insertedIndex = _insert(_commitment);
-            emit Deposit(msg.sender, _commitment, insertedIndex, block.timestamp);
-        } catch {
-            revert('INVALID_PROOF_DEPOSIT_2');
-        }
+        require(verifier.verify(_proof, _publicInputs), 'INVALID_PROOF_DEPOSIT');
+        uint32 insertedIndex = _insert(_commitment);
+        emit Deposit(msg.sender, _commitment, insertedIndex, block.timestamp);
     }
 
     function withdraw(
@@ -105,23 +102,19 @@ contract Twister is MerkleTreeWithHistory {
         _publicInputs[5] = bytes32(uint256(uint160(_relayer)));
         _publicInputs[6] = bytes32(0);
 
-        try verifier.verify(_proof, _publicInputs) returns (bool success) {
-            require(success, 'INVALID_PROOF');
+        require(verifier.verify(_proof, _publicInputs), 'INVALID_PROOF_WITHDRAW');
 
-            uint256 amount = _amount;
-            if (_relayer != _receiver) {
-                amount -= FEE;
-                (bool relayerPayed, ) = payable(_relayer).call{value: FEE}('');
-                require(relayerPayed, 'relayer payed');
-            }
-
-            // possibility to execute smartcontract like swap
-            (bool payed, ) = payable(_receiver).call{value: amount}(_execution);
-            require(payed, 'user payed');
-            uint32 insertedIndex = _insert(_commitment);
-            emit Withdrawal(_receiver, _commitment, insertedIndex);
-        } catch {
-            revert('INVALID_PROOF');
+        uint256 amount = _amount;
+        if (_relayer != _receiver) {
+            amount -= FEE;
+            (bool relayerPayed, ) = payable(_relayer).call{value: FEE}('');
+            require(relayerPayed, 'relayer payed');
         }
+
+        // possibility to execute smartcontract like swap
+        (bool payed, ) = payable(_receiver).call{value: amount}(_execution);
+        require(payed, 'user payed');
+        uint32 insertedIndex = _insert(_commitment);
+        emit Withdrawal(_receiver, _commitment, insertedIndex);
     }
 }
