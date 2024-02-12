@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import '../circuits/contract/noirstarter/plonk_vk.sol';
 import './MerkleTreeWithHistory.sol';
+import 'forge-std/Test.sol';
 
 contract Twister is MerkleTreeWithHistory {
     uint256 constant FEE = 0.0005 ether;
@@ -44,6 +45,9 @@ contract Twister is MerkleTreeWithHistory {
     }
 
     function deposit(bytes32 _commitment, bytes calldata _proof) external payable lock {
+        console.log(msg.value);
+        console.logBytes32(_commitment);
+        console.logBytes(_proof);
         require(msg.value >= MIN_AMOUNT && (msg.value % MIN_AMOUNT) == 0, 'INCORRECT_AMOUNT');
         require(!commitments[_commitment], 'The commitment has been submitted');
         require(_commitment != bytes32(uint256(0)), 'The commitment cant be empty');
@@ -59,11 +63,11 @@ contract Twister is MerkleTreeWithHistory {
         _publicInputs[6] = bytes32(uint256(1));
         // need to prove we deposit the correct amount
         try verifier.verify(_proof, _publicInputs) returns (bool success) {
-            require(success, 'INVALID_PROOF');
+            require(success, 'INVALID_PROOF_DEPOSIT');
             uint32 insertedIndex = _insert(_commitment);
             emit Deposit(msg.sender, _commitment, insertedIndex, block.timestamp);
         } catch {
-            revert('INVALID_PROOF');
+            revert('INVALID_PROOF_DEPOSIT_2');
         }
     }
 
@@ -78,6 +82,7 @@ contract Twister is MerkleTreeWithHistory {
         bytes calldata _proof,
         bytes calldata _execution
     ) external lock {
+        console.log('withdraw');
         require(_amount >= MIN_AMOUNT && (_amount % MIN_AMOUNT) == 0, 'INCORRECT_AMOUNT');
         require(!commitments[_commitment], 'The commitment has been submitted');
         require(!nullifierHashes[_nullifierHash], 'The note has been already spent');
