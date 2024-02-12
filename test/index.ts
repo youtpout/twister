@@ -82,7 +82,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
       console.log("hash", "0x" + BigInt(hash).toString(16));
       const res = BigInt(poseidon.F.toString(poseidon([...x])));
       console.log(res);
-      return "0x" + BigInt(hash).toString(16);
+      return "0x" + BigInt(hash).toString(16).padStart(64, 0);
     };
 
     const fnConc = (x: Buffer[]) => {
@@ -98,7 +98,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
       return hexa;
     };
 
-    const merkleTree = new MerkleTree(Array(4).fill(0), fnHash, {
+    const merkleTree = new MerkleTree(Array(256).fill(0), fnHash, {
       sort: false,
       hashLeaves: false,
       concatenator: fnConc
