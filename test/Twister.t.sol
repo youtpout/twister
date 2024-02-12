@@ -60,19 +60,82 @@ contract TwisterTest is Test {
         bytes32 root1 = merkleTest.getLastRoot();
         console.log('before root');
         console.logBytes32(root1);
+        bytes32[] memory witnesses = getWitnesses();
+        bytes32 calcRoot = computeRoot(bytes32(0), witnesses, 0);
+        assertEq(root1, calcRoot);
+
         merkleTest.insert(0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf);
         bytes32 root = merkleTest.getLastRoot();
         console.log('medium root');
         console.logBytes32(root);
+
+        for (uint32 i = 0; i < 8; i++) {
+            bytes32 t = merkleTest.filledSubtrees(i);
+            console.log('subtrees');
+            console.logBytes32(t);
+        }
+
         merkleTest.insert(0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf);
         bytes32 root3 = merkleTest.getLastRoot();
         console.log('Last root');
         console.logBytes32(root3);
 
-        for (uint32 i = 0; i < 2; i++) {
-            bytes32 t = merkleTest.filledSubtrees(i);
-            console.log('subtrees');
-            console.logBytes32(t);
+        console.log('---test');
+        console.logBytes32(
+            hashLeftRight(
+                0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf,
+                bytes32(0)
+            )
+        );
+        console.logBytes32(
+            hashLeftRight(
+                0x2e49708d29134206c69d3e92d40707352af01bba15f6dc71fa4030550a4e0bab,
+                0x2098f5fb9e239eab3ceac3f27b81e481dc3124d55ffed523a839ee8446b64864
+            )
+        );
+    }
+
+    function getWitnesses() private returns (bytes32[] memory witnesses) {
+        witnesses = new bytes32[](7);
+        for (uint256 i = 0; i < witnesses.length; i++) {
+            witnesses[i] = merkleTest.zeros(i);
         }
+    }
+
+    function getWitnesses256(bytes32[] memory leafs) private returns (bytes32[] memory witnesses) {
+        witnesses = new bytes32[](7);
+        for (uint256 i = 0; i < witnesses.length; i++) {
+            witnesses[i] = merkleTest.zeros(i);
+        }
+    }
+
+    function computeRoot(
+        bytes32 leaf,
+        bytes32[] memory witnesses,
+        uint256 index
+    ) private returns (bytes32 current) {
+        uint256 n = witnesses.length;
+        uint256[] memory indexBits = new uint256[](256);
+        uint256 k = 0;
+        while (index > 0) {
+            uint256 bit = index % 2;
+            uint256 quotient = index / 2;
+            indexBits[k] = bit;
+            k++;
+            index = quotient;
+        }
+        current = leaf;
+        for (uint i = 0; i < n; i++) {
+            uint256 pathBit = indexBits[i];
+            if (pathBit == 0) {
+                current = hashLeftRight(current, witnesses[i]);
+            } else {
+                current = hashLeftRight(witnesses[i], current);
+            }
+        }
+    }
+
+    function hashLeftRight(bytes32 _left, bytes32 _right) public pure returns (bytes32 value) {
+        value = bytes32(PoseidonT3.hash([uint256(_left), uint256(_right)]));
     }
 }

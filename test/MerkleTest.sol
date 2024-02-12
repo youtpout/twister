@@ -6,7 +6,7 @@ import '../src/MerkleTreeWithHistory.sol';
 contract MerkleTest is MerkleTreeWithHistory {
 
 
-    constructor() MerkleTreeWithHistory(2) {
+    constructor() MerkleTreeWithHistory(8) {
     }
 
     function merkleLeaf(uint256 _index) external view returns (bytes32) {

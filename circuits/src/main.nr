@@ -3,8 +3,8 @@ use dep::std;
 fn main(
     secret: Field,
     oldAmount: Field,
-    // tree with 16 depth for test, 15 witness
-    witnesses: [Field; 15],
+    // tree with 8 depth for test, 7 witness
+    witnesses: [Field; 7],
     leafIndex: Field,
     leaf: pub Field,
     merkleRoot: pub Field,
@@ -35,7 +35,7 @@ fn checkWithdraw(
     oldAmount: Field,
     leaf: Field,
     leafIndex: Field,
-    witnesses: [Field; 15],
+    witnesses: [Field; 7],
     merkleRoot: Field,
     nullifier: Field,
     amount: Field
@@ -90,7 +90,7 @@ fn test_hash_poseidon() {
 
 #[test]
 fn test_generate_deposit_leaf() {
-    let witnesses: [Field;15] = [0; 15];
+    let witnesses: [Field;7] = [0; 7];
     let result = main(
         1,
         250000000000000000,

@@ -22,6 +22,7 @@ contract MerkleTreeTest is Test {
             console.log(',');
             console.logBytes32(value);
         }
+      
     }
 
     function hashLeftRightPoseidon(bytes32 _left, bytes32 _right) public pure returns (bytes32 value) {

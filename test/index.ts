@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import hre from 'hardhat';
+import { Buffer } from 'buffer';
 
 import { Noir } from '@noir-lang/noir_js';
 import { BarretenbergBackend } from '@noir-lang/backend_barretenberg';
@@ -8,7 +9,10 @@ import { compile, PathToFileSourceMap } from '@noir-lang/noir_wasm';
 import { join } from 'path';
 import { ProofData } from '@noir-lang/types';
 import { readFileSync } from 'fs';
-import { text } from 'stream/consumers';
+import { buffer, text } from 'stream/consumers';
+
+import { MerkleTree } from 'merkletreejs';
+import { buildPoseidon } from "circomlibjs";
 
 const getCircuit = async (name: string) => {
   const sourcePath = new URL('../circuits/src/main.nr', import.meta.url);
@@ -56,7 +60,52 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     noirGenerator = new Noir(compiledGenerator.program, backendGenerator);
   });
 
+  function bufferToBigInt(buffer, start = 0, end = buffer.length) {
+    const bufferAsHexString = buffer.slice(start, end).toString("hex");
+    return BigInt(`0x${bufferAsHexString}`);
+  }
+
+
   it('Should generate valid proof for correct input', async () => {
+
+    const poseidon = await buildPoseidon();
+    const hash = poseidon.F.toString(poseidon([1, 250000000000000000]));
+    console.log("hash", "0x" + BigInt(hash).toString(16));
+
+    const hash2 = poseidon.F.toString(poseidon([0, 0]));
+    console.log("hash2", "0x" + BigInt(hash2).toString(16));
+
+    // function to use poseidon hash wirh merkletreejs
+    const fnHash = (x: Buffer[]) => {
+      console.log("x", [...x]);
+      const hash = poseidon.F.toString(poseidon([...x]));
+      console.log("hash", "0x" + BigInt(hash).toString(16));
+      const res = BigInt(poseidon.F.toString(poseidon([...x])));
+      console.log(res);
+      return "0x" + BigInt(hash).toString(16);
+    };
+
+    const fnConc = (x: Buffer[]) => {
+      const hexa = x.map(z => {
+        console.log("z", z);
+        if (z.indexOf('0x') > -1) {
+          return z;
+        }
+        return bufferToBigInt(z);
+      })
+      console.log("conc", hexa);
+      console.log("hexa", "0x" + BigInt(hexa[0]).toString(16));
+      return hexa;
+    };
+
+    const merkleTree = new MerkleTree(Array(4).fill(0), fnHash, {
+      sort: false,
+      hashLeaves: false,
+      concatenator: fnConc
+    });
+    const root = merkleTree.getHexRoot();
+    console.log("root", root);
+
     // get result from proof (leaf,nullifier)
     let inputGenerate = {
       secret: 1,
@@ -65,11 +114,14 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     const { witness, returnValue } = await noirGenerator.execute(inputGenerate);
     console.log("returnValue", returnValue);
 
+    var bn = BigInt(returnValue[0]);
+    var d = bn.toString(10);
+    console.log("decimal", d);
 
     let input = {
       secret: 1,
       oldAmount: 250000000000000000,
-      witnesses: Array(15).fill(0),
+      witnesses: Array(7).fill(0),
       leafIndex: 0,
       leaf: returnValue[0],
       merkleRoot: 0,
@@ -108,7 +160,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
       let input = {
         secret: 2,
         oldAmount: 250000000000000000,
-        witnesses: Array(16).fill(0),
+        witnesses: Array(7).fill(0),
         leafIndex: 0,
         leaf: "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf",
         merkleRoot: 0,

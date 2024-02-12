@@ -34,7 +34,7 @@ contract Twister is MerkleTreeWithHistory {
         unlocked = 1;
     }
 
-    constructor() MerkleTreeWithHistory(3) {
+    constructor() MerkleTreeWithHistory(8) {
         verifier = new UltraVerifier();
         unlocked = 1;
     }
