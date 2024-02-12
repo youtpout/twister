@@ -3,6 +3,7 @@ import '@nomicfoundation/hardhat-viem';
 import '@nomicfoundation/hardhat-chai-matchers';
 import "@nomicfoundation/hardhat-foundry";
 import "@nomicfoundation/hardhat-ethers";
+import '@typechain/hardhat';
 
 import { HardhatUserConfig } from 'hardhat/config';
 

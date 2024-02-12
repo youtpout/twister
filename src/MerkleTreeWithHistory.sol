@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
-import 'poseidon-solidity/PoseidonT3.sol';
+import {PoseidonT3} from './PoseidonT3.sol';
 
 // From a popular climatic event
 contract MerkleTreeWithHistory {

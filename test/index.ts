@@ -1,18 +1,15 @@
 import { expect } from 'chai';
 import hre from 'hardhat';
 import { Buffer } from 'buffer';
-
 import { Noir } from '@noir-lang/noir_js';
 import { BarretenbergBackend } from '@noir-lang/backend_barretenberg';
-
 import { compile, PathToFileSourceMap } from '@noir-lang/noir_wasm';
 import { join } from 'path';
 import { ProofData } from '@noir-lang/types';
 import { readFileSync } from 'fs';
-import { buffer, text } from 'stream/consumers';
-
 import { MerkleTree } from 'merkletreejs';
 import { buildPoseidon } from "circomlibjs";
+import { Twister } from "../typechain-types/src/Twister.js";
 
 const getCircuit = async (name: string) => {
   const sourcePath = new URL('../circuits/src/main.nr', import.meta.url);
@@ -39,15 +36,16 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
   let noir: Noir;
   let noirGenerator: Noir;
   let correctProof: ProofData;
-  let verifierContract: any;
+  let verifierContract: Twister;
 
   before(async () => {
     const compiled = await getCircuit('main');
     const compiledGenerator = await getCircuitGenerator('main');
 
-    const UltraVerifier = await hre.ethers.getContractFactory("UltraVerifier");
-    verifierContract = await UltraVerifier.deploy();
-    console.log(`Verifier deployed to ${verifierContract.address}`);
+    const UltraVerifier = await hre.ethers.getContractFactory("Twister");
+    const deployed = await UltraVerifier.deploy();
+    verifierContract = deployed as any as Twister;
+    console.log(`Verifier deployed to ${deployed.address}`);
 
     // @ts-ignore
     const backend = new BarretenbergBackend(compiled.program);
@@ -126,7 +124,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
       oldAmount: 250000000000000000,
       witnesses: Array(7).fill(0),
       leafIndex: 0,
-      leaf: returnValue[0],
+      leaf: "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf",
       merkleRoot: 0,
       nullifier: 0,
       amount: 250000000000000000,
@@ -145,15 +143,8 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
   it('Should verify valid proof for correct input', async () => {
     const verification = await noir.verifyFinalProof(correctProof);
     expect(verification).to.be.true;
-    const abi = hre.ethers.AbiCoder.defaultAbiCoder();
-    const publicInputs = Array(7).fill("0x0000000000000000000000000000000000000000000000000000000000000000");
-    publicInputs[0] = "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf";
-    publicInputs[3] = "0x00000000000000000000000000000000000000000000000003782dace9d90000";
-    publicInputs[6] = "0x0000000000000000000000000000000000000000000000000000000000000001";
-    const params = abi.encode(
-      ["bytes32[]"], // encode as address array
-      [publicInputs]);
-    const tx = await verifierContract.verify(correctProof.proof, publicInputs);
+    let resEth = hre.ethers.parseEther("0.25");
+    const tx = await verifierContract.deposit("0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf", correctProof.proof, { value: resEth });
     await tx.wait();
 
   });

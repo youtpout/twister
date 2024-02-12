@@ -18,6 +18,8 @@
     "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
     "@nomicfoundation/hardhat-toolbox-viem": "1.0.0",
     "@nomicfoundation/hardhat-viem": "1.0.0",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
     "circomlibjs": "^0.1.7",
     "dotenv": "^16.0.3",
     "ethers": "^6.11.0",
@@ -27,7 +29,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-toastify": "^9.1.1",
-    "typechain": "^8.1.0",
+    "typechain": "^8.3.2",
     "viem": "1.16.6"
   },
   "devDependencies": {

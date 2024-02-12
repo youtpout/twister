@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import 'forge-std/Test.sol';
 import {console} from 'forge-std/console.sol';
 import '../src/Twister.sol';
-import 'poseidon-solidity/PoseidonT3.sol';
+import '../src/PoseidonT3.sol';
 import '../circuits/contract/noirstarter/plonk_vk.sol';
 import './MerkleTest.sol';
 
