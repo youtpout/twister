@@ -71,12 +71,15 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     const hash2 = poseidon.F.toString(poseidon([0, 0]));
     console.log("hash2", "0x" + BigInt(hash2).toString(16));
 
+    const hashw = poseidon.F.toString(poseidon([1, 150000000000000000]));
+    console.log("leaf withdraw", "0x" + BigInt(hashw).toString(16));
+
     // function to use poseidon hash wirh merkletreejs
     const fnHash = (x: Buffer[]) => {
       //console.log("x", x);
       const hash = poseidon.F.toString(poseidon([...x]));
       const res = "0x" + BigInt(hash).toString(16).padStart(64, 0);
-      console.log("res", res);
+      //console.log("res", res);
       return res;
     };
 
@@ -92,7 +95,6 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
 
     const merkleLeaf = Array(256).fill(0);
     merkleLeaf[0] = "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf";
-    merkleLeaf[1] = "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf";
     const merkleTree = new MerkleTree(merkleLeaf, fnHash, {
       sort: false,
       hashLeaves: false,
@@ -101,7 +103,9 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
       concatenator: fnConc
     });
     const root = merkleTree.getHexRoot();
+    const witness = merkleTree.getHexProof("0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf");
     console.log("root", root);
+    console.log("witness", witness.map(x => BigInt(x)));
   });
 
   it('Should generate valid proof for correct input', async () => {
