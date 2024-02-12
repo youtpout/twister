@@ -149,6 +149,41 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
 
   });
 
+  it('Should withdraw', async () => {
+
+    // get result from proof (leaf,nullifier)
+    let inputGenerate = {
+      secret: 1,
+      amount: 150000000000000000
+    }
+    const { witness, returnValue } = await noirGenerator.execute(inputGenerate);
+    console.log("returnValue", returnValue);
+
+    var bn = BigInt(returnValue[0]);
+    var d = bn.toString(10);
+    console.log("decimal", d);
+
+    let input = {
+      secret: 1,
+      oldAmount: 250000000000000000,
+      witnesses: Array(8).fill(0),
+      leafIndex: 0,
+      leaf: "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf",
+      merkleRoot: 0,
+      nullifier: 0,
+      amount: 100000000000000000,
+      receiver: 0,
+      relayer: 0,
+      deposit: 1
+    };
+
+
+    // Generate proof
+    correctProof = await noir.generateFinalProof(input);
+    expect(correctProof.proof instanceof Uint8Array).to.be.true;
+    console.log("proof public inputs", correctProof.publicInputs);
+  }).timeout(1000000);
+
   it('Should fail to generate valid proof for incorrect input', async () => {
     try {
       let input = {
