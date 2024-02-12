@@ -1,7 +1,7 @@
 /// SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0;
 
-library PoseidonT3 {
+contract PoseidonT3 {
   uint constant M00 = 0x109b7f411ba0e4c9b2b70caf5c36a7b194be7c11ad24378bfedb68592ba8118b;
   uint constant M01 = 0x2969f27eed31a480b9c36c764379dbca2cc8fdd1415c3dded62940bcde0bd771;
   uint constant M02 = 0x143021ec686a3f330d5f9e654638065ce6cd79e28c5b3753326244ee65a1b1a7;
@@ -11,7 +11,7 @@ library PoseidonT3 {
 
   // See here for a simplified implementation: https://github.com/vimwitch/poseidon-solidity/blob/e57becdabb65d99fdc586fe1e1e09e7108202d53/contracts/Poseidon.sol#L40
   // Inspired by: https://github.com/iden3/circomlibjs/blob/v0.0.8/src/poseidon_slow.js
-  function hash(uint[2] memory) public pure returns (uint) {
+  function hash(uint[2] memory) external pure returns (uint) {
     assembly {
       let F := 21888242871839275222246405745257275088548364400416034343698204186575808495617
       let M20 := 0x2b90bba00fca0589f617e7dcbfe82e0df706ab640ceb247b791a93b74e36736d

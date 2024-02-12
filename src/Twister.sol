@@ -44,10 +44,10 @@ contract Twister is MerkleTreeWithHistory {
         return filledSubtrees[_index];
     }
 
-    function deposit(bytes32 _commitment, bytes calldata _proof) external payable {
-        console.log("deposit %s",msg.value);
-       // console.logBytes32(_commitment);
-       // console.logBytes(_proof);
+    function deposit(bytes32 _commitment, bytes calldata _proof) external payable lock {
+        console.log('deposit %s', msg.value);
+        // console.logBytes32(_commitment);
+        // console.logBytes(_proof);
         require(msg.value >= MIN_AMOUNT && (msg.value % MIN_AMOUNT) == 0, 'INCORRECT_AMOUNT');
         require(!commitments[_commitment], 'The commitment has been submitted');
         require(_commitment != bytes32(uint256(0)), 'The commitment cant be empty');
@@ -81,7 +81,7 @@ contract Twister is MerkleTreeWithHistory {
         uint256 _amount,
         bytes calldata _proof,
         bytes calldata _execution
-    ) external {
+    ) external lock {
         console.log('withdraw');
         require(_amount >= MIN_AMOUNT && (_amount % MIN_AMOUNT) == 0, 'INCORRECT_AMOUNT');
         require(!commitments[_commitment], 'The commitment has been submitted');

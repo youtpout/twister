@@ -5,6 +5,7 @@ import {PoseidonT3} from './PoseidonT3.sol';
 // From a popular climatic event
 contract MerkleTreeWithHistory {
     uint32 public levels;
+    PoseidonT3 public poseidon;
 
     // the following variables are made public for easier testing and debugging and
     // are not supposed to be accessed in regular code
@@ -22,6 +23,8 @@ contract MerkleTreeWithHistory {
         require(_levels < 32, '_levels should be less than 32');
         levels = _levels;
 
+        poseidon = new PoseidonT3();
+
         for (uint32 i = 0; i < _levels; i++) {
             filledSubtrees[i] = zeros(i);
         }
@@ -32,8 +35,8 @@ contract MerkleTreeWithHistory {
     /**
     @dev Hash 2 tree leaves
     */
-    function hashLeftRight(bytes32 _left, bytes32 _right) public pure returns (bytes32 value) {
-        value = bytes32(PoseidonT3.hash([uint256(_left), uint256(_right)]));
+    function hashLeftRight(bytes32 _left, bytes32 _right) public view returns (bytes32 value) {
+        value = bytes32(poseidon.hash([uint256(_left), uint256(_right)]));
     }
 
     function _insert(bytes32 _leaf) internal returns (uint32 index) {

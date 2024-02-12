@@ -13,6 +13,7 @@ contract TwisterTest is Test {
     bytes proofBytes;
     bytes proofBytesWithdraw;
     UltraVerifier public verifier;
+    PoseidonT3 public poseidon;
     MerkleTest public merkleTest;
 
     function setUp() public {
@@ -21,6 +22,7 @@ contract TwisterTest is Test {
         string memory proof = vm.readLine(proofFilePath);
         verifier = new UltraVerifier();
         merkleTest = new MerkleTest();
+        poseidon = new PoseidonT3();
 
         proofBytes = vm.parseBytes(proof);
         proofBytesWithdraw = vm.parseBytes(vm.readLine('./circuits/proofs/noirstarterw.proof'));
@@ -171,7 +173,7 @@ contract TwisterTest is Test {
         }
     }
 
-    function hashLeftRight(bytes32 _left, bytes32 _right) public pure returns (bytes32 value) {
-        value = bytes32(PoseidonT3.hash([uint256(_left), uint256(_right)]));
+    function hashLeftRight(bytes32 _left, bytes32 _right) public view returns (bytes32 value) {
+        value = bytes32(poseidon.hash([uint256(_left), uint256(_right)]));
     }
 }
