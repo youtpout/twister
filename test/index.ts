@@ -65,9 +65,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     return BigInt(`0x${bufferAsHexString}`);
   }
 
-
-  it('Should generate valid proof for correct input', async () => {
-
+  it('Should generate valid merkle', async () => {
     const poseidon = await buildPoseidon();
     const hash = poseidon.F.toString(poseidon([1, 250000000000000000]));
     console.log("hash", "0x" + BigInt(hash).toString(16));
@@ -77,34 +75,39 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
 
     // function to use poseidon hash wirh merkletreejs
     const fnHash = (x: Buffer[]) => {
-      console.log("x", [...x]);
+      //console.log("x", x);
       const hash = poseidon.F.toString(poseidon([...x]));
-      console.log("hash", "0x" + BigInt(hash).toString(16));
-      const res = BigInt(poseidon.F.toString(poseidon([...x])));
-      console.log(res);
-      return "0x" + BigInt(hash).toString(16).padStart(64, 0);
+      const res = "0x" + BigInt(hash).toString(16).padStart(64, 0);
+      console.log("res", res);
+      return res;
     };
 
     const fnConc = (x: Buffer[]) => {
       const hexa = x.map(z => {
-        console.log("z", z);
         if (z.indexOf('0x') > -1) {
           return z;
         }
         return bufferToBigInt(z);
       })
-      console.log("conc", hexa);
-      console.log("hexa", "0x" + BigInt(hexa[0]).toString(16));
       return hexa;
     };
 
-    const merkleTree = new MerkleTree(Array(256).fill(0), fnHash, {
+    const merkleLeaf = Array(256).fill(0);
+    merkleLeaf[0] = "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf";
+    merkleLeaf[1] = "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf";
+    const merkleTree = new MerkleTree(merkleLeaf, fnHash, {
       sort: false,
       hashLeaves: false,
+      sortPairs: false,
+      sortLeaves: false,
       concatenator: fnConc
     });
     const root = merkleTree.getHexRoot();
     console.log("root", root);
+  });
+
+  it('Should generate valid proof for correct input', async () => {
+
 
     // get result from proof (leaf,nullifier)
     let inputGenerate = {
@@ -150,7 +153,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     const params = abi.encode(
       ["bytes32[]"], // encode as address array
       [publicInputs]);
-    const tx = await verifierContract.verify(correctProof.proof, params);
+    const tx = await verifierContract.verify(correctProof.proof, publicInputs);
     await tx.wait();
 
   });
