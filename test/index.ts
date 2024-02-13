@@ -60,6 +60,15 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     return BigInt(`0x${bufferAsHexString}`);
   }
 
+  async function getProofInfo(secret: any, amount: any): Promise<{ leaf: any, nullifier: any }> {
+    const poseidon = await buildPoseidon();
+    const hash = poseidon.F.toString(poseidon([secret, amount]));
+    const leaf = "0x" + BigInt(hash).toString(16);
+    const hashN = poseidon.F.toString(poseidon([amount, secret]));
+    const nullifier = "0x" + BigInt(hashN).toString(16);
+    return { leaf, nullifier };
+  }
+
   it('Should generate valid merkle', async () => {
     const poseidon = await buildPoseidon();
     const hash = poseidon.F.toString(poseidon([1, 250000000000000000]));
@@ -116,9 +125,9 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     const { witness, returnValue } = await noirGenerator.execute(inputGenerate);
     console.log("returnValue", returnValue);
 
-    var bn = BigInt(returnValue[0]);
-    var d = bn.toString(10);
-    console.log("decimal", d);
+    // var bn = BigInt(returnValue[0]);
+    // var d = bn.toString(10);
+    // console.log("decimal", d);
 
     let input = {
       secret: 1,
@@ -153,25 +162,31 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
   it('Should withdraw', async () => {
 
     // get result from proof (leaf,nullifier)
-    let inputGenerate = {
-      secret: 1,
-      amount: 250000000000000000
-    }
-    const { witness, returnValue } = await noirGenerator.execute(inputGenerate);
-
-    inputGenerate.amount = 150000000000000000;
-    const { witness2, returnValue2 } = await noirGenerator.execute(inputGenerate);
-
+    const proofDepositInfo = await getProofInfo(1, 250000000000000000);
+    const proofWithdrawInfo = await getProofInfo(1, 150000000000000000);
+    console.log("proofDepositInfo", proofDepositInfo);
+    console.log("proofWithdrawInfo", proofWithdrawInfo);
     const root = verifierContract.getLastRoot();
+
+    const t = [
+      "0",
+      "14744269619966411208579211824598458697587494354926760081771325075741142829156",
+      "7423237065226347324353380772367382631490014989348495481811164164159255474657",
+      "11286972368698509976183087595462810875513684078608517520839298933882497716792",
+      "3607627140608796879659380071776844901612302623152076817094415224584923813162",
+      "19712377064642672829441595136074946683621277828620209496774504837737984048981",
+      "20775607673010627194014556968476266066927294572720319469184847051418138353016",
+      "3396914609616007258851405644437304192397291162432396347162513310381425243293"
+    ]
 
     let input = {
       secret: 1,
       oldAmount: 250000000000000000,
-      witnesses: witnessMerkle,
+      witnesses: t,
       leafIndex: 0,
-      leaf: returnValue2[0],
-      merkleRoot: root,
-      nullifier: returnValue[1],
+      leaf: "0x2558278ff77b5d4835c9496b4be5e058c898104dc11b5d76f66790131ed3d6dc",
+      merkleRoot: "0x0c992ddbba46b97652c6d903c593930507fbae5ac018271c04c57c84ea72bf02",
+      nullifier: "0x2d7bea6eead28cf6460e4d952afcc7397ca25c3e3dda5724bbb74924de309c9a",
       amount: 100000000000000000,
       receiver: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       relayer: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
