@@ -183,10 +183,14 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
       deposit: 0
     };
 
-
+    let resEth = hre.ethers.parseEther("0.1");
+    let emptyValue = hre.ethers.encodeBytes32String("");
     // Generate proof
     const withdrawProof = await noir.generateFinalProof(input);
-    verifierContract.withdraw(input.nullifier, input.leaf, root, input.receiver, input.receiver, input.amount, withdrawProof.proof, "");
+    const tx = await verifierContract.withdraw(input.nullifier, input.leaf, root, input.receiver, input.receiver, resEth, withdrawProof.proof, emptyValue);
+    await tx.wait();
+    const bal = await hre.ethers.provider.getBalance("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2");
+    console.log("balance", bal);
   }).timeout(1000000);
 
   it('Should failed to generate valid proof for bigger amount than deposit', async () => {
@@ -216,7 +220,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
 
       // Generate proof
       const withdrawProof = await noir.generateFinalProof(input);
-      verifierContract.withdraw(input.nullifier, input.leaf, root, input.receiver, input.receiver, input.amount, withdrawProof.proof, "");
+      await verifierContract.withdraw(input.nullifier, input.leaf, root, input.receiver, input.receiver, input.amount, withdrawProof.proof, "");
 
     } catch (err) {
       // TODO(Ze): Not sure how detailed we want this test to be
