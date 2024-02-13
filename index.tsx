@@ -16,13 +16,12 @@ const InitWasm = ({ children }) => {
   useEffect(() => {
     (async () => {
       await Promise.all([
-        initNoirWasm(
-          new URL('@noir-lang/noir_wasm/web/noir_wasm_bg.wasm', import.meta.url).toString(),
+        import("@noir-lang/noirc_abi").then(module => 
+          module.default(new URL("@noir-lang/noirc_abi/web/noirc_abi_wasm_bg.wasm", import.meta.url).toString())
         ),
-        initACVM(new URL('@noir-lang/acvm_js/web/acvm_js_bg.wasm', import.meta.url).toString()),
-        initNoirC(
-          new URL('@noir-lang/noirc_abi/web/noirc_abi_wasm_bg.wasm', import.meta.url).toString(),
-        ),
+        import("@noir-lang/acvm_js").then(module => 
+          module.default(new URL("@noir-lang/acvm_js/web/acvm_js_bg.wasm", import.meta.url).toString())
+        )
       ]);
       setInit(true);
     })();

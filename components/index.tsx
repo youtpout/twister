@@ -11,23 +11,15 @@ import { toast } from 'react-toastify';
 import React from 'react';
 
 import { Noir } from '@noir-lang/noir_js';
-import { BarretenbergBackend, flattenPublicInputs } from '@noir-lang/backend_barretenberg';
+import { BarretenbergBackend, } from '@noir-lang/backend_barretenberg';
 import { CompiledCircuit, ProofData } from '@noir-lang/types';
-import { compile, PathToFileSourceMap } from '@noir-lang/noir_wasm';
+import { compile, createFileManager } from '@noir-lang/noir_wasm';
 
 import { useAccount, useConnect, useContractWrite } from 'wagmi';
 import { contractCallConfig } from '../utils/wagmi.jsx';
 import { bytesToHex } from 'viem';
+import circuit from '../circuits/target/noirstarter.json';
 
-async function getCircuit(name: string) {
-  const res = await fetch(new URL('../circuits/src/main.nr', import.meta.url));
-  const noirSource = await res.text();
-
-  const sourceMap = new PathToFileSourceMap();
-  sourceMap.add_source_code('main.nr', noirSource);
-  const compiled = compile('main.nr', undefined, undefined, sourceMap);
-  return compiled;
-}
 
 function Component() {
   const [input, setInput] = useState({ x: 0, y: 0 });
@@ -86,7 +78,7 @@ function Component() {
 
     if (proof) {
       write?.({
-        args: [bytesToHex(proof.proof), flattenPublicInputs(proof.publicInputs)],
+        args: [bytesToHex(proof.proof)],
       });
     }
   };
@@ -105,15 +97,28 @@ function Component() {
   }, [data]);
 
   const initNoir = async () => {
-    const circuit = await getCircuit('main');
-
-    // @ts-ignore
-    const backend = new BarretenbergBackend(circuit.program, { threads: 8 });
+        // @ts-ignore
+    const backend = new BarretenbergBackend(circuit, { threads: 8 });
     setBackend(backend);
 
     // @ts-ignore
-    const noir = new Noir(circuit.program, backend);
-    await toast.promise(noir.init(), {
+    const noir = new Noir(circuit, backend);
+
+    let input = {
+      secret: 1,
+      oldAmount: 250000000000000000,
+      witnesses: Array(8).fill(0),
+      leafIndex: 0,
+      leaf: "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf",
+      merkleRoot: 0,
+      nullifier: 0,
+      amount: 250000000000000000,
+      receiver: 0,
+      relayer: 0,
+      deposit: 1
+    };
+
+    await toast.promise(noir.generateFinalProof(input), {
       pending: 'Initializing Noir...',
       success: 'Noir initialized!',
       error: 'Error initializing Noir',
