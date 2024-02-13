@@ -16,6 +16,12 @@ contract TwisterTest is Test {
     PoseidonT3 public poseidon;
     MerkleTest public merkleTest;
 
+    address deployer = makeAddr('Deployer');
+    address alice = makeAddr('Alice');
+    address bob = makeAddr('Bob');
+    address charlie = makeAddr('Charlie');
+    address daniel = makeAddr('Daniel');
+
     function setUp() public {
         twister = new Twister();
         string memory proofFilePath = './circuits/proofs/noirstarter.proof';
@@ -46,6 +52,8 @@ contract TwisterTest is Test {
     }
 
     function testDeposit() public {
+        deal(alice, 1 ether);
+        vm.startPrank(alice);
         bytes32 root1 = twister.getLastRoot();
         console.log('before root');
         console.logBytes32(root1);
@@ -58,6 +66,9 @@ contract TwisterTest is Test {
         bytes32 root = twister.getLastRoot();
         console.log('Last root');
         console.logBytes32(root);
+        vm.stopPrank();
+        // alice deposit 0.25 ether in contract
+        assertEq(alice.balance, 0.75 ether);
     }
 
     function testWithdraw() public {
@@ -92,6 +103,8 @@ contract TwisterTest is Test {
         root = twister.getLastRoot();
         console.log('Last root');
         console.logBytes32(root);
+        // receiver get 0.1 ether
+        assertEq(receiver.balance, 0.1 ether);
     }
 
     function testMerkleZero() public {
