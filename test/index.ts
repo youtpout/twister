@@ -189,6 +189,43 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     verifierContract.withdraw(input.nullifier, input.leaf, root, input.receiver, input.receiver, input.amount, withdrawProof.proof, "");
   }).timeout(1000000);
 
+  it('Should failed to generate valid proof for bigger amount than deposit', async () => {
+    try {
+      // get result from proof (leaf,nullifier)
+      const proofDepositInfo = await getProofInfo(1, 250000000000000000);
+      const proofWithdrawInfo = await getProofInfo(1, 300000000000000000);
+      console.log("proofDepositInfo", proofDepositInfo);
+      console.log("proofWithdrawInfo", proofWithdrawInfo);
+      const root = await verifierContract.getLastRoot();
+      console.log("root", root);
+
+      let input = {
+        secret: 1,
+        oldAmount: 250000000000000000,
+        witnesses: witnessMerkle,
+        leafIndex: 0,
+        leaf: proofWithdrawInfo.leaf,
+        merkleRoot: root,
+        nullifier: proofDepositInfo.nullifier,
+        amount: 100000000000000000,
+        receiver: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        relayer: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        deposit: 0
+      };
+
+
+      // Generate proof
+      const withdrawProof = await noir.generateFinalProof(input);
+      verifierContract.withdraw(input.nullifier, input.leaf, root, input.receiver, input.receiver, input.amount, withdrawProof.proof, "");
+
+    } catch (err) {
+      // TODO(Ze): Not sure how detailed we want this test to be
+      expect(err instanceof Error).to.be.true;
+      const error = err as Error;
+      expect(error.message).to.contain('Cannot satisfy constraint');
+    }
+  });
+
   it('Should fail to generate valid proof for incorrect input', async () => {
     try {
       let input = {
