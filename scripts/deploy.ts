@@ -6,7 +6,7 @@ async function main() {
   const publicClient = await viem.getPublicClient();
 
   // Deploy the verifier contract
-  const verifier = await viem.deployContract('UltraVerifier');
+  const verifier = await viem.deployContract('Twister');
 
   // Create a config object
   const config = {
