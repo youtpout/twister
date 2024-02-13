@@ -19,6 +19,7 @@ import { useAccount, useConnect, useContractWrite } from 'wagmi';
 import { contractCallConfig } from '../utils/wagmi.jsx';
 import { bytesToHex } from 'viem';
 import circuit from '../circuits/target/noirstarter.json';
+import ConnectButton from './connect.jsx';
 
 
 function Component() {
@@ -132,6 +133,7 @@ function Component() {
 
   return (
     <div className="container">
+      <ConnectButton></ConnectButton>
       <h1>Example starter</h1>
       <h2>This circuit checks that x and y are different</h2>
       <p>Try it!</p>

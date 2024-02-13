@@ -20,6 +20,7 @@
     "@nomicfoundation/hardhat-viem": "1.0.0",
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
+    "@web3modal/ethers": "^4.0.5",
     "circomlibjs": "^0.1.7",
     "dotenv": "^16.0.3",
     "ethers": "^6.11.0",
