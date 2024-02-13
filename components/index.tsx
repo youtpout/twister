@@ -137,8 +137,14 @@ function Component() {
       <h1>Example starter</h1>
       <h2>This circuit checks that x and y are different</h2>
       <p>Try it!</p>
-      <input name="x" type={'number'} onChange={handleChange} value={input.x} />
-      <input name="y" type={'number'} onChange={handleChange} value={input.y} />
+      <div> 
+        <span>Secret : </span>
+        <input name="x" type={'number'} onChange={handleChange} value={input.x} />
+      </div>
+      <div>
+        <span>amount (ETH) : </span>
+        <input name="y" type={'number'} onChange={handleChange} value={input.y} />
+      </div>
       <button onClick={calculateProof}>Calculate proof</button>
     </div>
   );
