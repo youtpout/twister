@@ -30,7 +30,7 @@ contract TwisterTest is Test {
 
     function testVerifier() public {
         bytes32 leaf = 0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf;
-        bytes32 nullifier = 0x1e3c6527094f6f524dcf9a514f823f9c0cdd20fb7f879c7bdf58bd2e7d3e0656;
+        bytes32 nullifier = 0x2d7bea6eead28cf6460e4d952afcc7397ca25c3e3dda5724bbb74924de309c9a;
 
         bytes32[] memory _publicInputs = new bytes32[](7);
 
@@ -51,7 +51,7 @@ contract TwisterTest is Test {
         console.logBytes32(root1);
 
         bytes32 leaf = 0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf;
-        bytes32 nullifier = 0x1e3c6527094f6f524dcf9a514f823f9c0cdd20fb7f879c7bdf58bd2e7d3e0656;
+        bytes32 nullifier = 0x2d7bea6eead28cf6460e4d952afcc7397ca25c3e3dda5724bbb74924de309c9a;
 
         twister.deposit{value: 0.25 ether}(leaf, proofBytes);
 
@@ -66,7 +66,7 @@ contract TwisterTest is Test {
         console.logBytes32(root1);
 
         bytes32 leaf = 0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf;
-        bytes32 nullifier = 0x1e3c6527094f6f524dcf9a514f823f9c0cdd20fb7f879c7bdf58bd2e7d3e0656;
+        bytes32 nullifier = 0x2d7bea6eead28cf6460e4d952afcc7397ca25c3e3dda5724bbb74924de309c9a;
 
         twister.deposit{value: 0.25 ether}(leaf, proofBytes);
 

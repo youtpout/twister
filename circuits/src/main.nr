@@ -40,7 +40,7 @@ fn checkWithdraw(
     nullifier: Field,
     amount: Field
 ) {
-    let hash_secretNullifer = std::hash::pedersen_hash([oldAmount, secret]);
+    let hash_secretNullifer = std::hash::poseidon::bn254::hash_2([oldAmount, secret]);
     assert(nullifier == hash_secretNullifer);
 
     // uint112 type like uniswap pool
