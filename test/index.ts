@@ -191,6 +191,9 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     await tx.wait();
     const bal = await hre.ethers.provider.getBalance("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2");
     console.log("balance", bal);
+
+    var event = await verifierContract.queryFilter(verifierContract.filters.AddLeaf);
+    console.log("events", event.map(x => x.args));
   }).timeout(1000000);
 
   it('Should failed to generate valid proof for bigger amount than deposit', async () => {

@@ -15,14 +15,13 @@ contract Twister is MerkleTreeWithHistory {
     UltraVerifier public verifier;
     uint32 unlocked;
 
-    event Deposit(
-        address indexed depositor,
+    event AddLeaf(
+        address indexed client,
         bytes32 indexed commitment,
-        uint32 leafIndex,
+        uint32 indexed leafIndex,
+        bool deposit,
         uint256 timestamp
     );
-    event Withdrawal(address indexed to, bytes32 indexed commitment, uint32 leafIndex);
-
     error Locked();
 
     // reentrancy guard
@@ -65,7 +64,7 @@ contract Twister is MerkleTreeWithHistory {
         // need to prove we deposit the correct amount
         require(verifier.verify(_proof, _publicInputs), 'INVALID_PROOF_DEPOSIT');
         uint32 insertedIndex = _insert(_commitment);
-        emit Deposit(msg.sender, _commitment, insertedIndex, block.timestamp);
+        emit AddLeaf(msg.sender, _commitment, insertedIndex, true, block.timestamp);
     }
 
     function withdraw(
@@ -115,6 +114,6 @@ contract Twister is MerkleTreeWithHistory {
         (bool payed, ) = payable(_receiver).call{value: amount}(_execution);
         require(payed, 'user payed');
         uint32 insertedIndex = _insert(_commitment);
-        emit Withdrawal(_receiver, _commitment, insertedIndex);
+        emit AddLeaf(_receiver, _commitment, insertedIndex, false, block.timestamp);
     }
 }
