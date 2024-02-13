@@ -34,6 +34,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
   let correctProof: ProofData;
   let verifierContract: Twister;
   let witnessMerkle;
+  let poseidon;
 
   before(async () => {
     const compiled = await getCircuit('main');
@@ -53,12 +54,33 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     const backendGenerator = new BarretenbergBackend(compiledGenerator.program);
     // @ts-ignore
     noirGenerator = new Noir(compiledGenerator.program, backendGenerator);
+
+    poseidon = await buildPoseidon();
   });
 
   function bufferToBigInt(buffer, start = 0, end = buffer.length) {
     const bufferAsHexString = buffer.slice(start, end).toString("hex");
     return BigInt(`0x${bufferAsHexString}`);
   }
+
+  // function to use poseidon hash wirh merkletreejs
+  const fnHash = (x: Buffer[]) => {
+    //console.log("x", x);
+    const hash = poseidon.F.toString(poseidon([...x]));
+    const res = "0x" + BigInt(hash).toString(16).padStart(64, 0);
+    //console.log("res", res);
+    return res;
+  };
+
+  const fnConc = (x: Buffer[]) => {
+    const hexa = x.map(z => {
+      if (z.indexOf('0x') > -1) {
+        return z;
+      }
+      return bufferToBigInt(z);
+    })
+    return hexa;
+  };
 
   async function getProofInfo(secret: any, amount: any): Promise<{ leaf: any, nullifier: any }> {
     const poseidon = await buildPoseidon();
@@ -70,7 +92,6 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
   }
 
   it('Should generate valid merkle', async () => {
-    const poseidon = await buildPoseidon();
     const hash = poseidon.F.toString(poseidon([1, 250000000000000000]));
     console.log("hash", "0x" + BigInt(hash).toString(16));
 
@@ -80,24 +101,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     const hashw = poseidon.F.toString(poseidon([1, 150000000000000000]));
     console.log("leaf withdraw", "0x" + BigInt(hashw).toString(16));
 
-    // function to use poseidon hash wirh merkletreejs
-    const fnHash = (x: Buffer[]) => {
-      //console.log("x", x);
-      const hash = poseidon.F.toString(poseidon([...x]));
-      const res = "0x" + BigInt(hash).toString(16).padStart(64, 0);
-      //console.log("res", res);
-      return res;
-    };
 
-    const fnConc = (x: Buffer[]) => {
-      const hexa = x.map(z => {
-        if (z.indexOf('0x') > -1) {
-          return z;
-        }
-        return bufferToBigInt(z);
-      })
-      return hexa;
-    };
 
     const merkleLeaf = Array(256).fill(0);
     merkleLeaf[0] = "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf";
@@ -192,11 +196,64 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
     const bal = await hre.ethers.provider.getBalance("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2");
     console.log("balance", bal);
 
-    var event = await verifierContract.queryFilter(verifierContract.filters.AddLeaf);
-    console.log("events", event.map(x => x.args));
   }).timeout(1000000);
 
+  it('Should second withdraw', async () => {
+    var event = await verifierContract.queryFilter(verifierContract.filters.AddLeaf);
+    var leafs = event.map(x => x.args[1]);
+
+    var arrayLeafs = Array(256).fill(0);
+    for (let index = 0; index < leafs.length; index++) {
+      const element = leafs[index];
+      arrayLeafs[index] = element;
+    }
+
+    console.log("leafs", leafs);
+
+    const merkleTree = new MerkleTree(arrayLeafs, fnHash, {
+      sort: false,
+      hashLeaves: false,
+      sortPairs: false,
+      sortLeaves: false,
+      concatenator: fnConc
+    });
+    const nwitnessMerkle = merkleTree.getHexProof(leafs[leafs.length - 1]);
+    // get result from proof (leaf,nullifier)
+    const proofDepositInfo = await getProofInfo(1, 250000000000000000);
+    const proofWithdrawInfo = await getProofInfo(1, 150000000000000000);
+    const proofWithdrawInfo2 = await getProofInfo(1, 0);
+    const root = await verifierContract.getLastRoot();
+
+    let input = {
+      secret: 1,
+      oldAmount: 150000000000000000,
+      witnesses: nwitnessMerkle,
+      leafIndex: 1,
+      leaf: proofWithdrawInfo2.leaf,
+      merkleRoot: root,
+      nullifier: proofWithdrawInfo.nullifier,
+      amount: 150000000000000000,
+      receiver: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      relayer: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      deposit: 0
+    };
+
+    let resEth = hre.ethers.parseEther("0.15");
+    let emptyValue = hre.ethers.encodeBytes32String("");
+    // Generate proof
+    const withdrawProof = await noir.generateFinalProof(input);
+    const tx = await verifierContract.withdraw(input.nullifier, input.leaf, root, input.receiver, input.receiver, resEth, withdrawProof.proof, emptyValue);
+    await tx.wait();
+    const bal = await hre.ethers.provider.getBalance("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2");
+    console.log("balance", bal);
+
+    var events = await verifierContract.queryFilter(verifierContract.filters.AddLeaf);
+    console.log("events", events.map(e => e.args));
+  }).timeout(1000000);
+
+
   it('Should failed to generate valid proof for bigger amount than deposit', async () => {
+    var event = await verifierContract.queryFilter(verifierContract.filters.AddLeaf);
     try {
       // get result from proof (leaf,nullifier)
       const proofDepositInfo = await getProofInfo(1, 250000000000000000);
