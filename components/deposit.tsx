@@ -32,7 +32,7 @@ function uuidv4() {
 
 
 function Deposit() {
-  const [input, setInput] = useState({ secret: 'my secret word respect case', amount: 0 });
+  const [input, setInput] = useState({ secret: 'SecretPassword', amount: 0.1 });
   const [proof, setProof] = useState<ProofData>();
   const [depositing, setDepositing] = useState<boolean>(false);
   const [noir, setNoir] = useState<Noir | null>(null);
@@ -47,6 +47,16 @@ function Deposit() {
     if (e.target) setInput({ ...input, [e.target.name]: e.target.value });
   };
 
+
+  async function getProofInfo(secret: any, amount: any): Promise<{ leaf: any, nullifier: any }> {
+    const poseidon = await buildPoseidon();
+    const hash = poseidon.F.toString(poseidon([secret, amount]));
+    const leaf = "0x" + BigInt(hash).toString(16);
+    const hashN = poseidon.F.toString(poseidon([amount, secret]));
+    const nullifier = "0x" + BigInt(hashN).toString(16);
+    return { leaf, nullifier };
+  }
+
   const depositAmount = async () => {
     try {
       if (depositing) {
@@ -56,15 +66,25 @@ function Deposit() {
       setDepositing(true);
       console.log("depositing");
 
+
+
+      let secret = ethers.keccak256(ethers.toUtf8Bytes(input.secret.toLowerCase()));
+      let amount = "0x" + ethers.parseEther(input.amount.toString()).toString(16);
+
+      const poseidon = await getProofInfo(secret, amount);
+      let leaf = poseidon.leaf;
+
+      console.log("leaf", leaf);
+
       let inputProof = {
-        secret: 1,
-        oldAmount: 250000000000000000,
+        secret,
+        oldAmount: amount,
         witnesses: Array(8).fill(0),
         leafIndex: 0,
-        leaf: "0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf",
+        leaf: leaf,
         merkleRoot: 0,
         nullifier: 0,
-        amount: 250000000000000000,
+        amount: amount,
         receiver: 0,
         relayer: 0,
         deposit: 1
@@ -91,8 +111,7 @@ function Deposit() {
 
       const address = addresses.verifier;
       const twister = Twister__factory.connect(address, signer);
-      let resEth = ethers.parseEther("0.25");
-      const tx = await twister.deposit("0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf", proof, { value: resEth });
+      const tx = await twister.deposit(inputProof.leaf, proof, { value: amount });
       await tx.wait();
 
     } catch (error) {
