@@ -121,7 +121,9 @@ function Deposit() {
       const tx = await twister.deposit(inputProof.leaf, proof, { value: amount });
       await tx.wait();
     } catch (error) {
-      console.log(error);
+      console.log(error);   
+      toast.error(error.toString());
+      throw error;
     }
     finally {
       setDepositing(false);

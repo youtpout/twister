@@ -15,13 +15,13 @@ import React from 'react';
 import { Noir } from '@noir-lang/noir_js';
 import { BarretenbergBackend, } from '@noir-lang/backend_barretenberg';
 import { CompiledCircuit, ProofData } from '@noir-lang/types';
-import { compile, createFileManager } from '@noir-lang/noir_wasm';
 
 import { useWeb3ModalProvider, useWeb3ModalAccount } from '@web3modal/ethers/react'
 import { BrowserProvider, Contract, ethers, formatUnits } from 'ethers'
 
 import circuit from '../circuits/target/noirstarter.json';
 import { buildPoseidon } from "circomlibjs";
+import { MerkleTree } from 'merkletreejs';
 
 
 
@@ -72,11 +72,42 @@ function Withdraw() {
     }
   }
 
+
+
+  function bufferToBigInt(buffer, start = 0, end = buffer.length) {
+    const bufferAsHexString = buffer.slice(start, end).toString("hex");
+    return BigInt(`0x${bufferAsHexString}`);
+  }
+
+  const fnConc = (x: Buffer[]) => {
+    const hexa = x.map(z => {
+      if (z.indexOf('0x') > -1) {
+        return z;
+      }
+      return bufferToBigInt(z);
+    })
+    return hexa;
+  };
+
   const withdrawAction = async () => {
     try {
+      const bPoseidon = await buildPoseidon();
+
       let secret = ethers.keccak256(ethers.toUtf8Bytes(input.secret.toLowerCase()));
-      let oldAmount = "0x" + ethers.parseEther(input.oldAmount.toString()).toString(16);
-      let amount = "0x" + ethers.parseEther(input.amount.toString()).toString(16);
+      let amountA = ethers.parseEther(input.oldAmount.toString());
+      let amountB = ethers.parseEther(input.amount.toString());
+      let newAmount = amountA - amountB;
+      let oldAmount = "0x" + amountA.toString(16);
+      let amount = "0x" + newAmount.toString(16);
+
+      const fnHash = (x: Buffer[]) => {
+        //console.log("x", x);
+        const hash = bPoseidon.F.toString(bPoseidon([...x]));
+        const res = "0x" + BigInt(hash).toString(16).padStart(64, 0);
+        //console.log("res", res);
+        return res;
+      };
+
 
       const poseidonOld = await getProofInfo(secret, oldAmount);
       let nullifer = poseidonOld.nullifier;
@@ -86,22 +117,6 @@ function Withdraw() {
 
       console.log("leaf", leaf);
 
-      const root = "0x";
-
-      let inputProof = {
-        secret,
-        oldAmount,
-        witnesses: Array(8).fill(0),
-        leafIndex: 0,
-        leaf: leaf,
-        merkleRoot: 0,
-        nullifier: nullifer,
-        amount,
-        receiver: 0,
-        relayer: 0,
-        deposit: 1
-      };
-
       if (!isConnected) {
         toast.error("Connect your wallet");
         throw Error('User disconnected');
@@ -109,19 +124,63 @@ function Withdraw() {
 
       const ethersProvider = new BrowserProvider(walletProvider);
       const signer = await ethersProvider.getSigner();
+      const address = addresses.verifier;
+      const twister = Twister__factory.connect(address, signer);
+      const root = await twister.getLastRoot();
 
+      var event = await twister.queryFilter(twister.filters.AddLeaf);
+      var leafs = event.map((x: any) => x.args);
+
+      console.log("events", leafs);
+
+      var arrayLeafs = Array(256).fill(0);
+      for (let index = 0; index < leafs.length; index++) {
+        const element = leafs[index];
+        arrayLeafs[index] = element[1];
+      }
+      console.log("arrayLeafs", arrayLeafs);
+      var leafInfo = leafs.find(x => x[1] === poseidonOld.leaf);
+      var leafIndex = "0x" + leafInfo[2].toString(16);
+
+      const merkleTree = new MerkleTree(arrayLeafs, fnHash, {
+        sort: false,
+        hashLeaves: false,
+        sortPairs: false,
+        sortLeaves: false,
+        concatenator: fnConc
+      });
+      const nwitnessMerkle = merkleTree.getHexProof(poseidonOld.leaf);
+
+      console.log("witness", nwitnessMerkle);
+
+      let inputProof = {
+        secret,
+        oldAmount,
+        witnesses: nwitnessMerkle,
+        leafIndex: leafIndex,
+        leaf: leaf,
+        merkleRoot: root,
+        nullifier: nullifer,
+        amount,
+        receiver: input.receiver,
+        relayer: input.relayer,
+        deposit: 0
+      };
+
+      console.log("input", inputProof);
 
       const { proof, publicInputs } = await noir!.generateFinalProof(inputProof);
       console.log('Proof created: ', proof);
       setProof({ proof, publicInputs });
 
+      let emptyValue = ethers.encodeBytes32String("");
 
-      const address = addresses.verifier;
-      const twister = Twister__factory.connect(address, signer);
-      const tx = await twister.withdraw(inputProof.leaf, proof, { value: amount });
+      const tx = await twister.withdraw(inputProof.nullifier, inputProof.leaf, root, input.receiver, input.relayer, amount, proof, emptyValue);;
       await tx.wait();
     } catch (error) {
       console.log(error);
+      toast.error(error.toString());
+      throw error;
     }
     finally {
       setDepositing(false);
