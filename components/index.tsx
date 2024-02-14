@@ -9,31 +9,34 @@ import {
 
 import "./index.scss";
 
-import { toast } from 'react-toastify';
 import React from 'react';
 
-import { Noir } from '@noir-lang/noir_js';
-import { BarretenbergBackend, } from '@noir-lang/backend_barretenberg';
-import { CompiledCircuit, ProofData } from '@noir-lang/types';
-import { compile, createFileManager } from '@noir-lang/noir_wasm';
-
-import { useAccount, useConnect, useContractWrite } from 'wagmi';
-import { contractCallConfig } from '../utils/wagmi.jsx';
-import { bytesToHex } from 'viem';
-import circuit from '../circuits/target/noirstarter.json';
-import ConnectButton from './connect.jsx';
 import Header from './header.jsx';
 import Deposit from './deposit.jsx';
+import Withdraw from './withdraw.jsx';
 
 
 function Component() {
+  const [tabName, setTabName] = useState("deposit");
 
   return (
     <>
       <Header></Header>
       <div className="container">
         <h1 className='title-page'>Transfer Ethereum privately</h1>
-        <Deposit></Deposit>
+        <div className='tab-block'>
+          <div className='tab-header'>
+            <span className={tabName === 'deposit' ? 'active' : ''} onClick={() => setTabName('deposit')}>Deposit</span>
+            <span className={tabName === 'withdraw' ? 'active' : ''} onClick={() => setTabName('withdraw')}>Withdraw</span>
+            <span className={tabName === 'swap' ? 'active' : ''} onClick={() => setTabName('swap')}>Swap</span>
+          </div>
+          <div className='tab-container'>
+
+            {tabName === "deposit" && <Deposit></Deposit>}
+            {tabName === "withdraw" &&
+              <Withdraw></Withdraw>}
+          </div>
+        </div>
       </div>
     </>
   );
