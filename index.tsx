@@ -4,6 +4,7 @@ import './App.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import Component from './components/index';
+import "@fontsource/space-grotesk";
 
 import initNoirWasm from '@noir-lang/noir_wasm';
 import initNoirC from '@noir-lang/noirc_abi';
