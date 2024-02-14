@@ -67,7 +67,19 @@ function Deposit() {
       console.log("depositing");
 
 
+      await toast.promise(depositAction, {
+        pending: 'Calculating proof...',
+        success: 'Proof calculated!',
+        error: 'Error calculating proof',
+      });
 
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const depositAction = async () => {
+    try {
       let secret = ethers.keccak256(ethers.toUtf8Bytes(input.secret.toLowerCase()));
       let amount = "0x" + ethers.parseEther(input.amount.toString()).toString(16);
 
@@ -103,26 +115,20 @@ function Deposit() {
       console.log('Proof created: ', proof);
       setProof({ proof, publicInputs });
 
-      // toast.promise(calc, {
-      //   pending: 'Calculating proof...',
-      //   success: 'Proof calculated!',
-      //   error: 'Error calculating proof',
-      // });
 
       const address = addresses.verifier;
       const twister = Twister__factory.connect(address, signer);
       const tx = await twister.deposit(inputProof.leaf, proof, { value: amount });
       await tx.wait();
-
     } catch (error) {
-      toast.error("Error on depositing");
       console.log(error);
     }
     finally {
       setDepositing(false);
     }
 
-  }
+
+  };
 
 
   const initNoir = async () => {
@@ -150,11 +156,11 @@ function Deposit() {
     <div className="tab-content">
       <div className='tab-form'>
         <span>Secret</span>
-        <input className='input' name="x" type={'text'} onChange={handleChange} value={input.secret} />
+        <input className='input' name="secret" type={'text'} onChange={handleChange} value={input.secret} />
       </div>
       <div className='tab-form'>
         <span>Amount (ETH)</span>
-        <input className='input' name="y" type={'number'} onChange={handleChange} value={input.amount} />
+        <input className='input' name="amount" type={'number'} onChange={handleChange} value={input.amount} />
       </div>
       <button className='button' onClick={depositAmount}>Deposit</button>
     </div>
