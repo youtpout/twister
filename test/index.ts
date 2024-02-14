@@ -9,7 +9,7 @@ import { ProofData } from '@noir-lang/types';
 import { readFileSync } from 'fs';
 import { MerkleTree } from 'merkletreejs';
 import { buildPoseidon } from "circomlibjs";
-import { Twister } from "../typechain-types/src/Twister.js";
+import { Twister__factory } from "../typechain-types/index.js";
 
 const getCircuit = async (name: string) => {
   const sourcePath = new URL('../circuits/', import.meta.url);

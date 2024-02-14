@@ -6,6 +6,8 @@ import {
   FormEvent,
   ChangeEvent,
 } from 'react';
+import { Twister__factory } from "../typechain-types/index.js";
+import addresses from "../utils/addresses.json";
 
 import { toast } from 'react-toastify';
 import React from 'react';
@@ -16,9 +18,10 @@ import { CompiledCircuit, ProofData } from '@noir-lang/types';
 import { compile, createFileManager } from '@noir-lang/noir_wasm';
 
 import { useWeb3ModalProvider, useWeb3ModalAccount } from '@web3modal/ethers/react'
-import { BrowserProvider, Contract, formatUnits } from 'ethers'
+import { BrowserProvider, Contract, ethers, formatUnits } from 'ethers'
 
 import circuit from '../circuits/target/noirstarter.json';
+import { buildPoseidon } from "circomlibjs";
 
 function uuidv4() {
   return "1000000000".replace(/[018]/g, c =>
@@ -44,14 +47,14 @@ function Deposit() {
     if (e.target) setInput({ ...input, [e.target.name]: e.target.value });
   };
 
-  const deposit = async () => {
+  const depositAmount = async () => {
     try {
       if (depositing) {
         console.log("already deposit");
         return;
       }
       setDepositing(true);
-      console.log("deposting");
+      console.log("depositing");
 
       let inputProof = {
         secret: 1,
@@ -75,18 +78,23 @@ function Deposit() {
       const ethersProvider = new BrowserProvider(walletProvider);
       const signer = await ethersProvider.getSigner();
 
-      const calc = new Promise(async (resolve, reject) => {
-        const { proof, publicInputs } = await noir!.generateFinalProof(inputProof);
-        console.log('Proof created: ', proof);
-        setProof({ proof, publicInputs });
-        resolve(proof);
-      });
 
-      toast.promise(calc, {
-        pending: 'Calculating proof...',
-        success: 'Proof calculated!',
-        error: 'Error calculating proof',
-      });
+      const { proof, publicInputs } = await noir!.generateFinalProof(inputProof);
+      console.log('Proof created: ', proof);
+      setProof({ proof, publicInputs });
+
+      // toast.promise(calc, {
+      //   pending: 'Calculating proof...',
+      //   success: 'Proof calculated!',
+      //   error: 'Error calculating proof',
+      // });
+
+      const address = addresses.verifier;
+      const twister = Twister__factory.connect(address, signer);
+      let resEth = ethers.parseEther("0.25");
+      const tx = await twister.deposit("0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf", proof, { value: resEth });
+      await tx.wait();
+
     } catch (error) {
       toast.error("Error on depositing");
       console.log(error);
@@ -129,7 +137,7 @@ function Deposit() {
         <span>Amount (ETH)</span>
         <input className='input' name="y" type={'number'} onChange={handleChange} value={input.amount} />
       </div>
-      <button className='button' onClick={deposit}>Deposit</button>
+      <button className='button' onClick={depositAmount}>Deposit</button>
     </div>
   );
 }

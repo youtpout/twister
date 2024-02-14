@@ -26,6 +26,14 @@ const mainnet = {
   rpcUrl: 'https://cloudflare-eth.com'
 }
 
+const hardhat = {
+  chainId: 31337,
+  name: 'Hardhat',
+  currency: 'ETH',
+  explorerUrl: 'https://etherscan.io',
+  rpcUrl: 'http://localhost:8545'
+}
+
 // 3. Create modal
 const metadata = {
   name: 'My Website',
@@ -36,7 +44,7 @@ const metadata = {
 
 createWeb3Modal({
   ethersConfig: defaultConfig({ metadata }),
-  chains: [mainnet],
+  chains: [mainnet, hardhat],
   projectId,
   enableAnalytics: true // Optional - defaults to your Cloud configuration
 })
@@ -47,10 +55,10 @@ const InitWasm = ({ children }) => {
   useEffect(() => {
     (async () => {
       await Promise.all([
-        import("@noir-lang/noirc_abi").then(module => 
+        import("@noir-lang/noirc_abi").then(module =>
           module.default(new URL("@noir-lang/noirc_abi/web/noirc_abi_wasm_bg.wasm", import.meta.url).toString())
         ),
-        import("@noir-lang/acvm_js").then(module => 
+        import("@noir-lang/acvm_js").then(module =>
           module.default(new URL("@noir-lang/acvm_js/web/acvm_js_bg.wasm", import.meta.url).toString())
         )
       ]);
