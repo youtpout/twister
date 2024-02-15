@@ -48,8 +48,8 @@ const scrollSepolia = {
 const metadata = {
   name: 'Twister',
   description: ' Inspired by a popular privacy protocol, the goal is to push the boundaries of what is possible when it comes to anonymous transfer.',
-  url: 'https://mywebsite.com', // origin must match your domain & subdomain
-  icons: ['https://avatars.mywebsite.com/']
+  url: 'https://youtpout.github.io/twister/', // origin must match your domain & subdomain
+  icons: ['https://youtpout.github.io/twister/twister.png']
 }
 
 createWeb3Modal({
