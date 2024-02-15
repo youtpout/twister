@@ -32,6 +32,8 @@ function Withdraw() {
   const [noir, setNoir] = useState<Noir | null>(null);
   const [backend, setBackend] = useState<BarretenbergBackend | null>(null);
 
+  const [rest, setRest] = useState<string>("");
+
   const { address, chainId, isConnected } = useWeb3ModalAccount();
   const { walletProvider } = useWeb3ModalProvider();
 
@@ -41,6 +43,17 @@ function Withdraw() {
     if (e.target) setInput({ ...input, [e.target.name]: e.target.value });
   };
 
+  useEffect(() => {
+    try {
+      let amountA = ethers.parseEther(input.oldAmount.toString());
+      let amountB = ethers.parseEther(input.amount.toString());
+      let newAmount = amountA - amountB;
+      let r = ethers.formatEther(newAmount.toString());
+      setRest(r.toString());
+    } catch (error) {
+
+    }
+  }, [input]);
 
   async function getProofInfo(secret: any, amount: any): Promise<{ leaf: any, nullifier: any }> {
     const poseidon = await buildPoseidon();
@@ -164,7 +177,7 @@ function Withdraw() {
         nullifier: nullifer,
         amount: amountWithdraw,
         receiver: input.receiver,
-        relayer: input.relayer,
+        relayer: input.receiver,
         deposit: 0
       };
 
@@ -226,15 +239,18 @@ function Withdraw() {
         <span>Amount to withdraw (ETH)</span>
         <input className='input' name="amount" type={'number'} onChange={handleChange} value={input.amount} />
       </div>
-      <div className='tab-form'>
+      {/* <div className='tab-form'>
         <span>Relayer</span>
         <input className='input' name="relayer" type={'text'} onChange={handleChange} value={input.relayer} />
-      </div>
+      </div> */}
       <div className='tab-form'>
         <span>Receiver</span>
         <input className='input' name="receiver" type={'text'} onChange={handleChange} value={input.receiver} />
       </div>
       <button className='button' onClick={withdrawAmount}>Withdraw</button>
+      <div style={{ marginTop: "10px" }}>
+        Remaining after withdraw : {rest} (ETH)
+      </div>
     </div>
   );
 }
