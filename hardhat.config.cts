@@ -4,6 +4,7 @@ import '@nomicfoundation/hardhat-chai-matchers';
 import "@nomicfoundation/hardhat-foundry";
 import "@nomicfoundation/hardhat-ethers";
 import '@typechain/hardhat';
+import "@nomicfoundation/hardhat-verify";
 
 import { HardhatUserConfig } from 'hardhat/config';
 
@@ -45,12 +46,31 @@ const config: HardhatUserConfig = {
     localhost: {
       url: 'http://127.0.0.1:8545',
     },
+    scrollSepolia: {
+      url: `https://sepolia-rpc.scroll.io`,
+      accounts: [process.env.SEPOLIA_DEPLOYER_PRIVATE_KEY as string],
+    },
     hardhat: {
       mining: {
         auto: true,
         interval: 1000,
       },
     },
+  },
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: process.env.ETHERSCAN_API_KEY as string,
+    customChains: [
+      {
+        network: 'scrollSepolia',
+        chainId: 534351,
+        urls: {
+          apiURL: 'https://sepolia-blockscout.scroll.io/api',
+          browserURL: 'https://sepolia-blockscout.scroll.io/',
+        },
+      },
+    ],
   },
   paths: {
     sources: './src',
