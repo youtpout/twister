@@ -12,6 +12,7 @@
     "prod": "hardhat compile && NODE_OPTIONS='--experimental-loader ts-node/esm/transpile-only' && vite build"
   },
   "dependencies": {
+    "@apollo/client": "^3.9.4",
     "@fontsource/space-grotesk": "^5.0.16",
     "@noir-lang/backend_barretenberg": "0.23.0",
     "@noir-lang/noir_js": "0.23.0",
@@ -26,6 +27,7 @@
     "circomlibjs": "^0.1.7",
     "dotenv": "^16.0.3",
     "ethers": "^6.11.0",
+    "graphql": "^16.8.1",
     "hardhat": "^2.19.2",
     "merkletreejs": "^0.3.11",
     "poseidon-solidity": "^0.0.5",

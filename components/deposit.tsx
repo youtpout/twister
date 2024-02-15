@@ -82,11 +82,17 @@ function Deposit() {
     try {
       let secret = ethers.keccak256(ethers.toUtf8Bytes(input.secret.toLowerCase()));
       let amount = "0x" + ethers.parseEther(input.amount.toString()).toString(16);
-
+      let secretAmount = BigInt(secret);
+      const maxModulo = BigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617");
+      if (secretAmount > maxModulo) {
+        secretAmount = secretAmount - maxModulo;
+        secret = "0x" + secretAmount.toString(16);
+      }
+      
       const poseidon = await getProofInfo(secret, amount);
-      let leaf = poseidon.leaf;
+      let leaf = "0x" + poseidon.leaf.replace('0x', '').padStart(64, 0);
 
-      console.log("leaf", leaf);
+      console.log("input", input);
 
       let inputProof = {
         secret,
@@ -109,19 +115,19 @@ function Deposit() {
 
       const ethersProvider = new BrowserProvider(walletProvider);
       const signer = await ethersProvider.getSigner();
-
-
+      0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+      0x5a7415a82d7d22d01dd3a431faf25fe161f37aad116400bdefa79291a9659c58
+      console.log("inputProof", inputProof);
       const { proof, publicInputs } = await noir!.generateFinalProof(inputProof);
       console.log('Proof created: ', proof);
       setProof({ proof, publicInputs });
-
 
       const address = addresses.verifier;
       const twister = Twister__factory.connect(address, signer);
       const tx = await twister.deposit(inputProof.leaf, proof, { value: amount });
       await tx.wait();
     } catch (error) {
-      console.log(error);   
+      console.log(error);
       toast.error(error.toString());
       throw error;
     }

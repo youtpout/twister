@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { Twister__factory } from "../typechain-types/index.js";
 import addresses from "../utils/addresses.json";
+import { gql } from "@apollo/client";
 
 import { toast } from 'react-toastify';
 import React from 'react';
@@ -22,7 +23,7 @@ import { BrowserProvider, Contract, ethers, formatUnits } from 'ethers'
 import circuit from '../circuits/target/noirstarter.json';
 import { buildPoseidon } from "circomlibjs";
 import { MerkleTree } from 'merkletreejs';
-
+import client from "./apollo.js";
 
 
 function Withdraw() {
@@ -32,10 +33,32 @@ function Withdraw() {
   const [noir, setNoir] = useState<Noir | null>(null);
   const [backend, setBackend] = useState<BarretenbergBackend | null>(null);
 
+  const graphKey = "aaa25f535d2b23f0b720120163e189cf";
+
   const [rest, setRest] = useState<string>("");
 
   const { address, chainId, isConnected } = useWeb3ModalAccount();
   const { walletProvider } = useWeb3ModalProvider();
+
+
+  const getLeaves = async () => {
+    const { data } = await client.query({
+      query: gql`
+        query MyQuery {
+          addLeaves(first: 300 orderBy: leafIndex) {
+            id
+            client
+            commitment
+            leafIndex
+          }
+        }
+      `, fetchPolicy: "no-cache"
+    });
+
+    console.log("data", data.addLeaves);
+    return data.addLeaves;
+  };
+
 
   // Handles input state
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -114,6 +137,14 @@ function Withdraw() {
       let amountWithdraw = "0x" + amountB.toString(16);
       let amount = "0x" + newAmount.toString(16);
 
+      let secretAmount = BigInt(secret);
+      const maxModulo = BigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617");
+      if (secretAmount > maxModulo) {
+        secretAmount = secretAmount - maxModulo;
+        secret = "0x" + secretAmount.toString(16);
+      }
+
+
       const fnHash = (x: Buffer[]) => {
         //console.log("x", x);
         const hash = bPoseidon.F.toString(bPoseidon([...x]));
@@ -124,10 +155,10 @@ function Withdraw() {
 
 
       const poseidonOld = await getProofInfo(secret, oldAmount);
-      let nullifer = poseidonOld.nullifier;
+      let nullifer = "0x" + poseidonOld.nullifier.replace('0x', '').padStart(64, 0);
 
       const poseidon = await getProofInfo(secret, amount);
-      let leaf = poseidon.leaf;
+      let leaf = "0x" + poseidon.leaf.replace('0x', '').padStart(64, 0);
 
       console.log("leaf", leaf);
 
@@ -142,19 +173,22 @@ function Withdraw() {
       const twister = Twister__factory.connect(address, signer);
       const root = await twister.getLastRoot();
 
-      var event = await twister.queryFilter(twister.filters.AddLeaf);
-      var leafs = event.map((x: any) => x.args);
+      var leafs = await getLeaves();
 
       console.log("events", leafs);
 
       var arrayLeafs = Array(256).fill(0);
       for (let index = 0; index < leafs.length; index++) {
-        const element = leafs[index];
-        arrayLeafs[index] = element[1];
+        const element = leafs[index].commitment;
+        console.log("element", element);
+        arrayLeafs[index] = element;
       }
       console.log("arrayLeafs", arrayLeafs);
-      var leafInfo = leafs.find(x => x[1] === poseidonOld.leaf);
-      var leafIndex = "0x" + leafInfo[2].toString(16);
+      var leafInfo = leafs.find(x => x.commitment === poseidonOld.leaf);
+      if (!leafInfo) {
+        throw Error("No commitment found for this secret/amount pair");
+      }
+      var leafIndex = "0x" + leafInfo.leafIndex.toString(16);
 
       const merkleTree = new MerkleTree(arrayLeafs, fnHash, {
         sort: false,
@@ -181,7 +215,7 @@ function Withdraw() {
         deposit: 0
       };
 
-      console.log("input", inputProof);
+      console.log("inputProof", inputProof);
 
       const { proof, publicInputs } = await noir!.generateFinalProof(inputProof);
       console.log('Proof created: ', proof);
