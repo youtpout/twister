@@ -34,6 +34,15 @@ contract TwisterTest is Test {
         proofBytesWithdraw = vm.parseBytes(vm.readLine('./circuits/proofs/noirstarterw.proof'));
     }
 
+    function testRootGeneration() public {
+        bytes32 leaf = 0x114f2c2ede8989b365da0b08794ddd8f3fc3816e41b1bec42325df8f3d0f0f10;
+
+        merkleTest.insert(leaf);
+        bytes32 root = merkleTest.getLastRoot();
+        console.log('Last root root generation');
+        console.logBytes32(root);
+    }
+
     function testVerifier() public {
         bytes32 leaf = 0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf;
         bytes32 nullifier = 0x2d7bea6eead28cf6460e4d952afcc7397ca25c3e3dda5724bbb74924de309c9a;

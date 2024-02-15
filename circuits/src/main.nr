@@ -149,7 +149,7 @@ fn test_merkle_root_real() {
         0x078295e5a22b84e982cf601eb639597b8b0515a88cb5ac7fa8a4aabe3c87349d
     ];
     let root = compute_merkle_root(
-        0x1cb6b64090ca5ba35e66820b61d9686047bbb12dd2aa9e68dd688a1098f9157a,
+        0x114f2c2ede8989b365da0b08794ddd8f3fc3816e41b1bec42325df8f3d0f0f10,
         0,
         witnesses
     );
@@ -161,3 +161,26 @@ fn test_merkle_root_real() {
     std::println(root);
 }
 
+#[test]
+fn test_proof() {
+    let witnesses: [Field;8] = [
+        0x00,
+        0x2098f5fb9e239eab3ceac3f27b81e481dc3124d55ffed523a839ee8446b64864,
+        0x1069673dcdb12263df301a6ff584a7ec261a44cb9dc68df067a4774460b1f1e1,
+        0x18f43331537ee2af2e3d758d50f72106467c6eea50371dd528d57eb2b856d238,
+        0x07f9d837cb17b0d36320ffe93ba52345f1b728571a568265caac97559dbc952a,
+        0x2b94cf5e8746b3f5c9631f4c5df32907a699c58c94b2ad4d7b5cec1639183f55,
+        0x2dee93c5a666459646ea7d22cca9e1bcfed71e6951b953611d11dda32ea09d78,
+        0x078295e5a22b84e982cf601eb639597b8b0515a88cb5ac7fa8a4aabe3c87349d
+    ];
+    let newLeaf:Field = 0x1cb6b64090ca5ba35e66820b61d9686047bbb12dd2aa9e68dd688a1098f9157a;
+    let oldLeaf:Field = 0x114f2c2ede8989b365da0b08794ddd8f3fc3816e41b1bec42325df8f3d0f0f10;
+    let root = 0x13572e3b7b640c11dab9c7045d4ed10f862ecb29d579184652f1b3d60ae849c7;
+    let oldAmount = 0x16345785d8a0000;
+    let nullifier = 0x1f8f4058cccb205ef62b75a4357ba9408b2f9d5018736e62ccb16490a7ecfa2e;
+    let receiver = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8;
+    let secret = 0x0774f396230c7f0cbc21c9244ae800a42f8a3eef2ee9c2abd398f684307655e1;
+    let result = main(secret, oldAmount, witnesses, 0, newLeaf, root, nullifier, oldAmount, receiver, receiver, 0);
+    std::println("result withdraw");
+    std::println(result);
+}

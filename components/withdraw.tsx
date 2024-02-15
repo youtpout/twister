@@ -98,6 +98,7 @@ function Withdraw() {
       let amountB = ethers.parseEther(input.amount.toString());
       let newAmount = amountA - amountB;
       let oldAmount = "0x" + amountA.toString(16);
+      let amountWithdraw = "0x" + amountB.toString(16);
       let amount = "0x" + newAmount.toString(16);
 
       const fnHash = (x: Buffer[]) => {
@@ -161,7 +162,7 @@ function Withdraw() {
         leaf: leaf,
         merkleRoot: root,
         nullifier: nullifer,
-        amount,
+        amount: amountWithdraw,
         receiver: input.receiver,
         relayer: input.relayer,
         deposit: 0
@@ -175,7 +176,7 @@ function Withdraw() {
 
       let emptyValue = ethers.encodeBytes32String("");
 
-      const tx = await twister.withdraw(inputProof.nullifier, inputProof.leaf, root, input.receiver, input.relayer, amount, proof, emptyValue);;
+      const tx = await twister.withdraw(inputProof.nullifier, inputProof.leaf, root, inputProof.receiver, inputProof.relayer, inputProof.amount, proof, emptyValue);
       await tx.wait();
     } catch (error) {
       console.log(error);
