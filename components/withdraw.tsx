@@ -145,7 +145,7 @@ function Withdraw() {
           secret = "0x" + secretAmount.toString(16);
         } while (secretAmount > maxModulo);
       }
-    
+
 
 
       const fnHash = (x: Buffer[]) => {
@@ -156,9 +156,9 @@ function Withdraw() {
         return res;
       };
 
-
       const poseidonOld = await getProofInfo(secret, oldAmount);
       let nullifer = "0x" + poseidonOld.nullifier.replace('0x', '').padStart(64, 0);
+      let oldLeaf = "0x" + poseidonOld.leaf.replace('0x', '').padStart(64, 0);
 
       const poseidon = await getProofInfo(secret, amount);
       let leaf = "0x" + poseidon.leaf.replace('0x', '').padStart(64, 0);
@@ -187,7 +187,7 @@ function Withdraw() {
         arrayLeafs[index] = element;
       }
       console.log("arrayLeafs", arrayLeafs);
-      var leafInfo = leafs.find(x => x.commitment === poseidonOld.leaf);
+      var leafInfo = leafs.find(x => x.commitment === oldLeaf);
       if (!leafInfo) {
         throw Error("No commitment found for this secret/amount pair");
       }
@@ -200,7 +200,7 @@ function Withdraw() {
         sortLeaves: false,
         concatenator: fnConc
       });
-      const nwitnessMerkle = merkleTree.getHexProof(poseidonOld.leaf);
+      const nwitnessMerkle = merkleTree.getHexProof(oldLeaf);
 
       console.log("witness", nwitnessMerkle);
 
