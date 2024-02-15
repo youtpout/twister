@@ -8,7 +8,8 @@
     "build": "hardhat compile && yarn deploy && vite build",
     "preview": "vite preview",
     "deploy": "hardhat compile && NODE_OPTIONS='--experimental-loader ts-node/esm/transpile-only' hardhat run --network ${NETWORK} scripts/deploy.ts",
-    "test": "NODE_OPTIONS='--experimental-loader ts-node/esm/transpile-only' hardhat test"
+    "test": "NODE_OPTIONS='--experimental-loader ts-node/esm/transpile-only' hardhat test",
+    "prod": "vite build"
   },
   "dependencies": {
     "@fontsource/space-grotesk": "^5.0.16",
