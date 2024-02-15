@@ -15,6 +15,8 @@ import { join } from 'path';
 import { writeFile } from 'fs/promises';
 dotenv.config();
 
+const account = process.env?.SEPOLIA_DEPLOYER_PRIVATE_KEY || "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+
 subtask(TASK_COMPILE_SOLIDITY).setAction(async (_, { config }, runSuper) => {
   const superRes = await runSuper();
 
@@ -37,18 +39,18 @@ const config: HardhatUserConfig = {
   networks: {
     mumbai: {
       url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.MUMBAI_ALCHEMY_KEY}`,
-      accounts: [process.env.MUMBAI_DEPLOYER_PRIVATE_KEY as string],
+      accounts: [account],
     },
     sepolia: {
       url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.SEPOLIA_ALCHEMY_KEY}`,
-      accounts: [process.env.SEPOLIA_DEPLOYER_PRIVATE_KEY as string],
+      accounts: [account],
     },
     localhost: {
       url: 'http://127.0.0.1:8545',
     },
     scrollSepolia: {
       url: `https://sepolia-rpc.scroll.io`,
-      accounts: [process.env.SEPOLIA_DEPLOYER_PRIVATE_KEY as string],
+      accounts: [account],
     },
     hardhat: {
       mining: {
