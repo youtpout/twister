@@ -28,7 +28,7 @@ function Component() {
           <div className='tab-header'>
             <span className={tabName === 'deposit' ? 'active' : ''} onClick={() => setTabName('deposit')}>Deposit</span>
             <span className={tabName === 'withdraw' ? 'active' : ''} onClick={() => setTabName('withdraw')}>Withdraw</span>
-            <span className={tabName === 'swap' ? 'active' : ''} onClick={() => setTabName('swap')}>Swap</span>
+            {/* <span className={tabName === 'swap' ? 'active' : ''} onClick={() => setTabName('swap')}>Swap</span> */}
           </div>
           <div className='tab-container'>
 

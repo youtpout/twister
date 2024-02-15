@@ -47,7 +47,7 @@ const scrollSepolia = {
 // 3. Create modal
 const metadata = {
   name: 'Twister',
-  description: ' Inspired by a popular privacy protocol, the goal is to push the boundaries of what is possible when it comes to anonymous transfer.',
+  description: 'Twister is an anonymous transfer POC on scroll sepolia created with noir.',
   url: 'https://youtpout.github.io/twister/', // origin must match your domain & subdomain
   icons: ['https://youtpout.github.io/twister/twister.png']
 }
