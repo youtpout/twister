@@ -54,5 +54,4 @@ crs
 artifacts
 .yarn/
 
-circuits/target
 dist
