@@ -34,17 +34,27 @@ const hardhat = {
   rpcUrl: 'http://localhost:8545'
 }
 
+
+const scrollSepolia = {
+  chainId: 534351,
+  name: 'Scroll Sepolia',
+  currency: 'ETH',
+  explorerUrl: 'https://sepolia.scrollscan.com',
+  rpcUrl: 'https://sepolia-rpc.scroll.io/'
+}
+
+
 // 3. Create modal
 const metadata = {
-  name: 'My Website',
-  description: 'My Website description',
+  name: 'Twister',
+  description: ' Inspired by a popular privacy protocol, the goal is to push the boundaries of what is possible when it comes to anonymous transfer.',
   url: 'https://mywebsite.com', // origin must match your domain & subdomain
   icons: ['https://avatars.mywebsite.com/']
 }
 
 createWeb3Modal({
   ethersConfig: defaultConfig({ metadata }),
-  chains: [mainnet, hardhat],
+  chains: [scrollSepolia],
   projectId,
   enableAnalytics: true // Optional - defaults to your Cloud configuration
 })

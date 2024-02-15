@@ -11,4 +11,5 @@ export default defineConfig({
     target: 'esnext',
   },
   plugins: [react()],
+  base: "https://youtpout.github.io/twister/"
 });
