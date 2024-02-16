@@ -122,8 +122,9 @@ function Deposit() {
       console.log("inputProof", inputProof);
 
       if (true) {
-        let formData = new FormData();
-        formData.append("proof_input", JSON.stringify(inputProof));
+        const formData = new URLSearchParams();
+        let data = 'secret= 1\noldAmount= 250000000000000000\nwitnesses= [0,0,0,0,0,0,0,0]\nleafIndex= 0\nleaf= \"0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf\"\nmerkleRoot= 0\nnullifier= 0\namount= 250000000000000000\nreceiver= 0\nrelayer= 0\ndeposit= 1';
+        formData.append("proof_input", JSON.stringify(data));
         const prove = await fetch("https://sindri.app/api/v1/circuit/1f73ed8a-4963-4c0c-94ba-1791ac1f0b9d/prove", {
           method: "POST",
           body: formData,
