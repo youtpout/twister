@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "deploy": "hardhat compile && NODE_OPTIONS='--experimental-loader ts-node/esm/transpile-only' hardhat run --network ${NETWORK} scripts/deploy.ts",
     "test": "NODE_OPTIONS='--experimental-loader ts-node/esm/transpile-only' hardhat test",
-    "prod": "hardhat compile && NODE_OPTIONS='--experimental-loader ts-node/esm/transpile-only' && vite build"
+    "prod": "hardhat compile && NODE_OPTIONS='--experimental-loader ts-node/esm/transpile-only' && vite build",
+    "scroll": "vite"
   },
   "dependencies": {
     "@apollo/client": "^3.9.4",

@@ -90,8 +90,8 @@ function Deposit() {
           secret = "0x" + secretAmount.toString(16);
         } while (secretAmount > maxModulo);
       }
-    
-      
+
+
       const poseidon = await getProofInfo(secret, amount);
       let leaf = "0x" + poseidon.leaf.replace('0x', '').padStart(64, 0);
 
@@ -118,9 +118,26 @@ function Deposit() {
 
       const ethersProvider = new BrowserProvider(walletProvider);
       const signer = await ethersProvider.getSigner();
-      0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
-      0x5a7415a82d7d22d01dd3a431faf25fe161f37aad116400bdefa79291a9659c58
+
       console.log("inputProof", inputProof);
+
+      if (true) {
+        let formData = new FormData();
+        formData.append("proof_input", JSON.stringify(inputProof));
+        const prove = await fetch("https://sindri.app/api/v1/circuit/1f73ed8a-4963-4c0c-94ba-1791ac1f0b9d/prove", {
+          method: "POST",
+          body: formData,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "application/json",
+            "Authorization": "Bearer sindri-Y1qkOKoN734PWkUCxwrJ2a1WhnZtIwLG-Stsk"
+          },
+        });
+        console.log("prove", prove);
+        const proveResult = await prove.json();
+        console.log("proveResult", proveResult);
+      }
+
       const { proof, publicInputs } = await noir!.generateFinalProof(inputProof);
       console.log('Proof created: ', proof);
       setProof({ proof, publicInputs });
