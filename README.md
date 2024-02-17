@@ -6,6 +6,7 @@ There is already a popular protocol for depositing an amount and withdrawing it 
 
 [Subgraph repository](https://github.com/youtpout/twister-graph)
 
+[Sindri repository](https://github.com/youtpout/SindriServer/)
 
 # Noir with Vite and Hardhat
 
