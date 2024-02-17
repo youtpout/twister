@@ -46,7 +46,7 @@ function Component() {
           <p>
             Also keep the amount you deposit, you will need it to withdraw
           </p>
-          <h5>Sindri's server proof generation</h5>
+          <h5>Sindri's server proof</h5>
           <p>If your computer is not very powerful or you use a smartphone prefer this option, your proof will be generated on Sindri's servers in a few seconds</p>
           <h4>Withdraw</h4>
           <p>
@@ -56,6 +56,12 @@ function Component() {
           <p>So you have 0.4 ether left and you want to withdraw 0.2 ether again, at the next withdrawal, you enter the secret "hello", amount 0.4 ether, amount to withdraw 0.2 ether, this will allow you to make several withdrawals for the same deposit on different accounts</p>
         </div>
       </div>
+      <footer>
+        <img width={40} src='scroll.jpg'></img>
+        <img width={40} src='sindri.jpg'></img>
+        <img width={40} src='noir.png'></img>
+        <img width={40} src='aztec.jpg'></img>
+      </footer>
     </>
   );
 }

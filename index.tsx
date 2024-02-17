@@ -91,6 +91,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <Component />
       <ToastContainer />
     </InitWasm>
-    ,
   </Providers>,
 );

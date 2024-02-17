@@ -12,3 +12,11 @@ header {
 
     }
 }
+
+
+@media (max-width: 1024px) {
+    .title {
+        font-weight: bold;
+        font-size: 20px !important;
+    }
+}

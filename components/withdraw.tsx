@@ -341,7 +341,7 @@ function Withdraw() {
       </div>
       <div className='tab-check'>
         <input name="server" id='server' type={'checkbox'} onChange={handleCheck} checked={input.server} />
-        <label htmlFor="server" >Sindri's server proof generation</label>
+        <label htmlFor="server" >Sindri's server proof</label>
       </div>
       <button className='button' onClick={withdrawAmount}>Withdraw</button>
       <div style={{ marginTop: "10px" }}>
