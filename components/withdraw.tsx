@@ -228,6 +228,9 @@ function Withdraw() {
       });
       const nwitnessMerkle = merkleTree.getHexProof(oldLeaf);
 
+      const rootJs = merkleTree.getHexRoot();
+      console.log("rootJs", rootJs);
+
       console.log("witness", nwitnessMerkle);
 
       let inputProof = {
