@@ -47,7 +47,7 @@ contract Twister is MerkleTreeWithHistory {
         require(!commitments[_commitment], 'The commitment has been submitted');
         require(_commitment != bytes32(uint256(0)), 'The commitment cant be empty');
         commitments[_commitment] = true;
-        bytes32[] memory _publicInputs = new bytes32[](7);
+        bytes32[] memory _publicInputs = new bytes32[](8);
 
         _publicInputs[0] = _commitment;
         _publicInputs[1] = bytes32(0);
@@ -56,6 +56,7 @@ contract Twister is MerkleTreeWithHistory {
         _publicInputs[4] = bytes32(0);
         _publicInputs[5] = bytes32(0);
         _publicInputs[6] = bytes32(uint256(1));
+        _publicInputs[7] = bytes32(0);
 
         // need to prove we deposit the correct amount
         require(verifier.verify(_proof, _publicInputs), 'INVALID_PROOF_DEPOSIT');
@@ -86,7 +87,7 @@ contract Twister is MerkleTreeWithHistory {
         nullifierHashes[_nullifierHash] = true;
         commitments[_commitment] = true;
 
-        bytes32[] memory _publicInputs = new bytes32[](7);
+        bytes32[] memory _publicInputs = new bytes32[](8);
 
         _publicInputs[0] = _commitment;
         _publicInputs[1] = _root;
@@ -95,6 +96,7 @@ contract Twister is MerkleTreeWithHistory {
         _publicInputs[4] = bytes32(uint256(uint160(_receiver)));
         _publicInputs[5] = bytes32(uint256(uint160(_relayer)));
         _publicInputs[6] = bytes32(0);
+        _publicInputs[7] = bytes32(0);
 
         require(verifier.verify(_proof, _publicInputs), 'INVALID_PROOF_WITHDRAW');
 
