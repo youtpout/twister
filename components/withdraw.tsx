@@ -27,7 +27,7 @@ import client from "./apollo.js";
 
 
 function Withdraw() {
-  const [input, setInput] = useState({ secret: 'SecretPassword', oldAmount: 0.1, amount: 0.1, receiver: '', relayer: '' });
+  const [input, setInput] = useState({ secret: 'SecretPassword', oldAmount: 0.01, amount: 0.01, receiver: '', relayer: '' });
   const [proof, setProof] = useState<ProofData>();
   const [depositing, setDepositing] = useState<boolean>(false);
   const [noir, setNoir] = useState<Noir | null>(null);
@@ -96,10 +96,30 @@ function Withdraw() {
       setDepositing(true);
       console.log("withdrawing");
 
+      if (!input.receiver) {
+        toast.error("Put a receiver");
+        setDepositing(false);
+        return;
+      }
+      if (!input.secret) {
+        toast.error("Put a secret");
+        setDepositing(false);
+        return;
+      }
+      if (!input.oldAmount) {
+        toast.error("Put a current amount");
+        setDepositing(false);
+        return;
+      }
+      if (!input.amount) {
+        toast.error("Put a amount");
+        setDepositing(false);
+        return;
+      }
 
       await toast.promise(withdrawAction, {
         pending: 'Calculating proof...',
-        success: 'Proof calculated!',
+        success: 'Proof submitted!',
         error: 'Error calculating proof',
       });
 

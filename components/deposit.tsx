@@ -6,7 +6,7 @@ import {
   FormEvent,
   ChangeEvent,
 } from 'react';
-import { Twister__factory } from "../typechain-types/index.js";
+import { Twister__factory, Twister } from "../typechain-types/index.js";
 import addresses from "../utils/addresses.json";
 
 import { toast } from 'react-toastify';
@@ -32,7 +32,7 @@ function uuidv4() {
 
 
 function Deposit() {
-  const [input, setInput] = useState({ secret: 'SecretPassword', amount: 0.1 });
+  const [input, setInput] = useState({ secret: 'SecretPassword', amount: 0.01 });
   const [proof, setProof] = useState<ProofData>();
   const [depositing, setDepositing] = useState<boolean>(false);
   const [noir, setNoir] = useState<Noir | null>(null);
@@ -66,10 +66,22 @@ function Deposit() {
       setDepositing(true);
       console.log("depositing");
 
+      if (!input.secret) {
+        toast.error("Put a secret");
+        setDepositing(false);
+        return;
+      }
+      if (!input.amount) {
+        toast.error("Put a amount");
+        setDepositing(false);
+        return;
+      }
+
+
 
       await toast.promise(depositAction, {
         pending: 'Calculating proof...',
-        success: 'Proof calculated!',
+        success: 'Proof submitted!',
         error: 'Error calculating proof',
       });
 
@@ -95,20 +107,22 @@ function Deposit() {
       const poseidon = await getProofInfo(secret, amount);
       let leaf = "0x" + poseidon.leaf.replace('0x', '').padStart(64, 0);
 
+
+
       console.log("input", input);
 
       let inputProof = {
         secret,
         oldAmount: amount,
-        witnesses: Array(8).fill(0),
-        leafIndex: 0,
+        witnesses: Array(8).fill("0x0"),
+        leafIndex: "0x0",
         leaf: leaf,
-        merkleRoot: 0,
-        nullifier: 0,
+        merkleRoot: "0x0",
+        nullifier: "0x0",
         amount: amount,
-        receiver: 0,
-        relayer: 0,
-        deposit: 1
+        receiver: "0x0",
+        relayer: "0x0",
+        deposit: "0x1"
       };
 
       if (!isConnected) {
@@ -118,33 +132,44 @@ function Deposit() {
 
       const ethersProvider = new BrowserProvider(walletProvider);
       const signer = await ethersProvider.getSigner();
+      const address = addresses.verifier;
+      const twister: Twister = Twister__factory.connect(address, signer);
 
       console.log("inputProof", inputProof);
 
-      if (true) {
-        const formData = new URLSearchParams();
-        let data = 'secret= 1\noldAmount= 250000000000000000\nwitnesses= [0,0,0,0,0,0,0,0]\nleafIndex= 0\nleaf= \"0x191e3a4e10e469f9b6408e9ca05581ca1b303ff148377553b1655c04ee0f7caf\"\nmerkleRoot= 0\nnullifier= 0\namount= 250000000000000000\nreceiver= 0\nrelayer= 0\ndeposit= 1';
-        formData.append("proof_input", JSON.stringify(data));
-        const prove = await fetch("https://sindri.app/api/v1/circuit/1f73ed8a-4963-4c0c-94ba-1791ac1f0b9d/prove", {
-          method: "POST",
-          body: formData,
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Accept": "application/json",
-            "Authorization": "Bearer sindri-Y1qkOKoN734PWkUCxwrJ2a1WhnZtIwLG-Stsk"
-          },
-        });
-        console.log("prove", prove);
-        const proveResult = await prove.json();
-        console.log("proveResult", proveResult);
+      
+      const commited = await twister.commitments(leaf);
+      if(commited){
+        throw Error("This secret/amount pair was already submitted");
       }
 
-      const { proof, publicInputs } = await noir!.generateFinalProof(inputProof);
-      console.log('Proof created: ', proof);
-      setProof({ proof, publicInputs });
+      let proof;
+      if (true) {
+        try {
 
-      const address = addresses.verifier;
-      const twister = Twister__factory.connect(address, signer);
+          const prove = await fetch('https://localhost:7103/api/twister', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(inputProof)
+          });
+          console.log("prove", prove);
+          const proveResult = await prove.json();
+          proof = ethers.toBeArray("0x" + proveResult.proof);
+          console.log("proveResult", proveResult);
+          setProof({ proof, publicInputs: inputProof });
+        } catch (error) {
+          throw Error("Proof generation by server failed, try generate proof on web browser.");
+        }
+      } else {
+        const { proof, publicInputs } = await noir!.generateFinalProof(inputProof);
+        console.log('Proof created: ', proof);
+        setProof({ proof, publicInputs });
+      }
+
+
       const tx = await twister.deposit(inputProof.leaf, proof, { value: amount });
       await tx.wait();
     } catch (error) {
