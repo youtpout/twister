@@ -144,11 +144,10 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
       amount: 250000000000000000,
       receiver: 0,
       relayer: 0,
-      deposit: 1,
-      token: 0
+      deposit: 1
     };
 
-    // link 0x7273ebbB21F8D8AcF2bC12E71a08937712E9E40c
+
     // Generate proof
     correctProof = await noir.generateFinalProof(input);
     expect(correctProof.proof instanceof Uint8Array).to.be.true;
@@ -185,8 +184,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
       amount: 100000000000000000,
       receiver: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       relayer: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      deposit: 0,
-      token: 0
+      deposit: 0
     };
 
     let resEth = hre.ethers.parseEther("0.1");
@@ -237,8 +235,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
       amount: 150000000000000000,
       receiver: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       relayer: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      deposit: 0,
-      token: 0
+      deposit: 0
     };
 
     let resEth = hre.ethers.parseEther("0.15");
@@ -277,8 +274,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
         amount: 100000000000000000,
         receiver: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
         relayer: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-        deposit: 0,
-        token: 0
+        deposit: 0
       };
 
 
@@ -308,7 +304,7 @@ describe('It compiles noir program code, receiving circuit bytes and abi object.
         receiver: 0,
         relayer: 0,
         deposit: 1,
-        token: 0
+
       };
       const incorrectProof = await noir.generateFinalProof(input);
     } catch (err) {

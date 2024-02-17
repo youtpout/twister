@@ -12,8 +12,7 @@ fn main(
     amount: pub Field,
     receiver: pub Field,
     relayer: pub Field,
-    deposit: pub Field,
-    token: pub Field
+    deposit: pub Field
 ) {
     if deposit == 1 {
         // we check on deposit if the user deposit the correct amount of eth
@@ -103,8 +102,7 @@ fn test_generate_deposit_leaf() {
         250000000000000000,
         0,
         0,
-        1,
-        0
+        1
     );
     std::println("result deposit");
     std::println(result);
@@ -176,12 +174,13 @@ fn test_proof() {
         0x078295e5a22b84e982cf601eb639597b8b0515a88cb5ac7fa8a4aabe3c87349d
     ];
     let newLeaf:Field = 0x1cb6b64090ca5ba35e66820b61d9686047bbb12dd2aa9e68dd688a1098f9157a;
+    let oldLeaf:Field = 0x114f2c2ede8989b365da0b08794ddd8f3fc3816e41b1bec42325df8f3d0f0f10;
     let root = 0x13572e3b7b640c11dab9c7045d4ed10f862ecb29d579184652f1b3d60ae849c7;
     let oldAmount = 0x16345785d8a0000;
     let nullifier = 0x1f8f4058cccb205ef62b75a4357ba9408b2f9d5018736e62ccb16490a7ecfa2e;
     let receiver = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8;
     let secret = 0x0774f396230c7f0cbc21c9244ae800a42f8a3eef2ee9c2abd398f684307655e1;
-    let result = main(secret, oldAmount, witnesses, 0, newLeaf, root, nullifier, oldAmount, receiver, receiver, 0, 0);
+    let result = main(secret, oldAmount, witnesses, 0, newLeaf, root, nullifier, oldAmount, receiver, receiver, 0);
     std::println("result withdraw");
     std::println(result);
 }
@@ -205,10 +204,7 @@ fn test_proof_root() {
     let nullifier = 0x02fe9c374a0efb303b5ca4dbd1ebed95f5980e68be31afe582d2a877467d6a7b;
     let receiver = 0xEcD3AC1898Be94458EBB975Eb7ed10E51B86370E;
     let secret = 0x2fa4ffb03a5e74f2eb712350cfe4d0e85f2ac572640f252033bcb1f078d437a0;
-    let result = main(
-        secret, oldAmount, witnesses, 12, newLeaf, root, nullifier, oldAmount, receiver, receiver, 0x0,
-        0
-    );
+    let result = main(secret, oldAmount, witnesses, 12, newLeaf, root, nullifier, oldAmount, receiver, receiver, 0x0);
     std::println("result withdraw");
     std::println(result);
 
