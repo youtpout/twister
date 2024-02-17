@@ -8,6 +8,10 @@ There is already a popular protocol for depositing an amount and withdrawing it 
 
 [Sindri repository](https://github.com/youtpout/SindriServer/)
 
+## How proof system works
+
+![App schema](https://github.com/youtpout/twister/blob/main/proof.png?raw=true)
+
 # Noir with Vite and Hardhat
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/e4bd1ebc-6be1-4ed2-8be8-18f70382ae22/deploy-status)](https://app.netlify.com/sites/noir-vite-hardhat/deploys)
