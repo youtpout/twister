@@ -27,7 +27,7 @@ import client from "./apollo.js";
 
 
 function Withdraw() {
-  const [input, setInput] = useState({ secret: 'SecretPassword', oldAmount: 0.01, amount: 0.01, receiver: '', relayer: '' });
+  const [input, setInput] = useState({ secret: 'SecretPassword', oldAmount: 0.01, amount: 0.01, receiver: '', relayer: '', server: true });
   const [proof, setProof] = useState<ProofData>();
   const [depositing, setDepositing] = useState<boolean>(false);
   const [noir, setNoir] = useState<Noir | null>(null);
@@ -65,6 +65,12 @@ function Withdraw() {
     e.preventDefault();
     if (e.target) setInput({ ...input, [e.target.name]: e.target.value });
   };
+
+  const handleCheck = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target) setInput({ ...input, [e.target.name]: e.target.checked });
+  };
+
+
 
   useEffect(() => {
     try {
@@ -235,14 +241,36 @@ function Withdraw() {
         amount: amountWithdraw,
         receiver: input.receiver,
         relayer: input.receiver,
-        deposit: 0
+        deposit: "0x0"
       };
 
       console.log("inputProof", inputProof);
 
-      const { proof, publicInputs } = await noir!.generateFinalProof(inputProof);
-      console.log('Proof created: ', proof);
-      setProof({ proof, publicInputs });
+      let proof;
+      if (input.server) {
+        try {
+
+          const prove = await fetch('https://localhost:7103/api/twister', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(inputProof)
+          });
+          console.log("prove", prove);
+          const proveResult = await prove.json();
+          proof = ethers.toBeArray("0x" + proveResult.proof);
+          console.log("proveResult", proveResult);
+          setProof({ proof, publicInputs: inputProof });
+        } catch (error) {
+          throw Error("Proof generation by server failed, try generate proof on web browser.");
+        }
+      } else {
+        const { proof, publicInputs } = await noir!.generateFinalProof(inputProof);
+        console.log('Proof created: ', proof);
+        setProof({ proof, publicInputs });
+      }
 
       let emptyValue = ethers.encodeBytes32String("");
 
@@ -303,6 +331,10 @@ function Withdraw() {
       <div className='tab-form'>
         <span>Receiver</span>
         <input className='input' name="receiver" type={'text'} onChange={handleChange} value={input.receiver} />
+      </div>
+      <div className='tab-check'>
+        <input name="server" id='server' type={'checkbox'} onChange={handleCheck} checked={input.server} />
+        <label htmlFor="server" >Sindri's server proof generation</label>
       </div>
       <button className='button' onClick={withdrawAmount}>Withdraw</button>
       <div style={{ marginTop: "10px" }}>

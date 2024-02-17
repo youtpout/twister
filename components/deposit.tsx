@@ -32,7 +32,7 @@ function uuidv4() {
 
 
 function Deposit() {
-  const [input, setInput] = useState({ secret: 'SecretPassword', amount: 0.01 });
+  const [input, setInput] = useState({ secret: 'SecretPassword', amount: 0.01, server: true });
   const [proof, setProof] = useState<ProofData>();
   const [depositing, setDepositing] = useState<boolean>(false);
   const [noir, setNoir] = useState<Noir | null>(null);
@@ -46,6 +46,11 @@ function Deposit() {
     e.preventDefault();
     if (e.target) setInput({ ...input, [e.target.name]: e.target.value });
   };
+
+  const handleCheck = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target) setInput({ ...input, [e.target.name]: e.target.checked });
+  };
+
 
 
   async function getProofInfo(secret: any, amount: any): Promise<{ leaf: any, nullifier: any }> {
@@ -144,7 +149,7 @@ function Deposit() {
       }
 
       let proof;
-      if (true) {
+      if (input.server) {
         try {
 
           const prove = await fetch('https://localhost:7103/api/twister', {
@@ -215,6 +220,10 @@ function Deposit() {
       <div className='tab-form'>
         <span>Amount (ETH)</span>
         <input className='input' name="amount" type={'number'} onChange={handleChange} value={input.amount} />
+      </div>
+      <div className='tab-check'>
+        <input name="server" id='server' type={'checkbox'} onChange={handleCheck} checked={input.server} />
+        <label htmlFor="server" >Sindri's server proof generation</label>
       </div>
       <button className='button' onClick={depositAmount}>Deposit</button>
     </div>

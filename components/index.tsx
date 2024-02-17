@@ -46,6 +46,8 @@ function Component() {
           <p>
             Also keep the amount you deposit, you will need it to withdraw
           </p>
+          <h5>Sindri's server proof generation</h5>
+          <p>If your computer is not very powerful or you use a smartphone prefer this option, your proof will be generated on Sindri's servers in a few seconds</p>
           <h4>Withdraw</h4>
           <p>
             You must enter the secret and the amount entered during the deposit, in the amount to withdraw you can enter an amount equal to or less than the amount remaining in your account, you can withdraw a minimum of 0.001 eth and in steps of 0.001 eth
