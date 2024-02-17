@@ -207,23 +207,9 @@ fn test_proof_root() {
     let result = main(secret, oldAmount, witnesses, 12, newLeaf, root, nullifier, oldAmount, receiver, receiver, 0x0);
     std::println("result withdraw");
     std::println(result);
-    /*  "Prover.toml": "secret= \"0x2fa4ffb03a5e74f2eb712350cfe4d0e85f2ac572640f252033bcb1f078d437a0\"\n
-      oldAmount= \"0x2386f26fc10000\"\n
-      witnesses= [\"0x00\",
-      \"0x2098f5fb9e239eab3ceac3f27b81e481dc3124d55ffed523a839ee8446b64864\",
-      \"0x1fcf14f820cf6f47a0a1b951f0ee100be4f2a93d1be97b2cee3605f688a76dcc\",
-      \"0x1b7a8e84cfb68bba0a4c57492feff93fab957cd40ccd9be064c3407b15ec592d\",
-      \"0x07f9d837cb17b0d36320ffe93ba52345f1b728571a568265caac97559dbc952a\",
-      \"0x2b94cf5e8746b3f5c9631f4c5df32907a699c58c94b2ad4d7b5cec1639183f55\",
-      \"0x2dee93c5a666459646ea7d22cca9e1bcfed71e6951b953611d11dda32ea09d78\",
-      \"0x078295e5a22b84e982cf601eb639597b8b0515a88cb5ac7fa8a4aabe3c87349d\"]\n
-      leafIndex= \"0x12\"\n
-      leaf= \"0x13eaea9d8bf684b3f7d1f67a2e636d4d8c61ab82298d9658074a21f04ec79f87\"\n
-      merkleRoot= \"0x1375682d9bae7f76d72b19abe7e629e36a89429914f51d55fe2442db977dc79a\"\n
-      nullifier= \"0x02fe9c374a0efb303b5ca4dbd1ebed95f5980e68be31afe582d2a877467d6a7b\"\n
-      amount= \"0x2386f26fc10000\"\n
-      receiver= \"0xEcD3AC1898Be94458EBB975Eb7ed10E51B86370E\"\n
-      relayer= \"0xEcD3AC1898Be94458EBB975Eb7ed10E51B86370E\"\n
-      deposit= \"0x0\""*/
+
+    let newRoot = compute_merkle_root(newLeaf, 0x0c, witnesses);
+    std::println("result compute root");
+    std::println(newRoot);
 }
 

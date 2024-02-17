@@ -217,7 +217,7 @@ function Withdraw() {
       if (!leafInfo) {
         throw Error("No commitment found for this secret/amount pair");
       }
-      var leafIndex = "0x" + leafInfo.leafIndex.toString(16);
+      var leafIndex = "0x" +  BigInt(leafInfo.leafIndex).toString(16);
 
       const merkleTree = new MerkleTree(arrayLeafs, fnHash, {
         sort: false,
@@ -278,7 +278,7 @@ function Withdraw() {
       let emptyValue = ethers.encodeBytes32String("");
 
       const tx = await twister.withdraw(inputProof.nullifier, inputProof.leaf, root, inputProof.receiver, inputProof.relayer, inputProof.amount, proof, emptyValue);
-      await tx.wait();
+      //await tx.wait();
     } catch (error) {
       console.log(error);
       toast.error(error.toString());

@@ -112,8 +112,6 @@ function Deposit() {
       const poseidon = await getProofInfo(secret, amount);
       let leaf = "0x" + poseidon.leaf.replace('0x', '').padStart(64, 0);
 
-
-
       console.log("input", input);
 
       let inputProof = {
@@ -176,7 +174,6 @@ function Deposit() {
 
 
       const tx = await twister.deposit(inputProof.leaf, proof, { value: amount });
-      await tx.wait();
     } catch (error) {
       console.log(error);
       toast.error(error.toString());
