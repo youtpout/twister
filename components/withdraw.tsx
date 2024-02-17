@@ -106,12 +106,12 @@ function Withdraw() {
         setDepositing(false);
         return;
       }
-      if (!input.oldAmount) {
+      if (!input.oldAmount || input.oldAmount === "0") {
         toast.error("Put a current amount");
         setDepositing(false);
         return;
       }
-      if (!input.amount) {
+      if (!input.amount || input.amount === "0") {
         toast.error("Put a amount");
         setDepositing(false);
         return;

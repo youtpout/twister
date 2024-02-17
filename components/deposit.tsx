@@ -71,7 +71,7 @@ function Deposit() {
         setDepositing(false);
         return;
       }
-      if (!input.amount) {
+      if (!input.amount || input.amount === "0") {
         toast.error("Put a amount");
         setDepositing(false);
         return;
@@ -137,9 +137,9 @@ function Deposit() {
 
       console.log("inputProof", inputProof);
 
-      
+
       const commited = await twister.commitments(leaf);
-      if(commited){
+      if (commited) {
         throw Error("This secret/amount pair was already submitted");
       }
 
