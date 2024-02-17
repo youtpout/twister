@@ -150,7 +150,7 @@ function Deposit() {
       if (input.server) {
         try {
 
-          const prove = await fetch('https://localhost:7103/api/twister', {
+          const prove = await fetch('https://twister.azurewebsites.net/api/twister', {
             method: 'POST',
             headers: {
               'Accept': 'application/json',

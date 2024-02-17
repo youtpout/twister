@@ -201,6 +201,10 @@ function Withdraw() {
       const address = addresses.verifier;
       const twister = Twister__factory.connect(address, signer);
       const root = await twister.getLastRoot();
+      const commited = await twister.commitments(leaf);
+      if (commited) {
+        throw Error("This secret/amount pair was already submitted");
+      }
 
       var leafs = await getLeaves();
 
@@ -253,7 +257,7 @@ function Withdraw() {
       if (input.server) {
         try {
 
-          const prove = await fetch('https://localhost:7103/api/twister', {
+          const prove = await fetch('https://twister.azurewebsites.net/api/twister', {
             method: 'POST',
             headers: {
               'Accept': 'application/json',
