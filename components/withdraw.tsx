@@ -15,7 +15,6 @@ import React from 'react';
 
 import { Noir } from '@noir-lang/noir_js';
 import { BarretenbergBackend, } from '@noir-lang/backend_barretenberg';
-import { CompiledCircuit, ProofData } from '@noir-lang/types';
 
 import { useWeb3ModalProvider, useWeb3ModalAccount } from '@web3modal/ethers/react'
 import { BrowserProvider, Contract, ethers, formatUnits } from 'ethers'
@@ -28,7 +27,6 @@ import client from "./apollo.js";
 
 function Withdraw() {
   const [input, setInput] = useState({ secret: 'SecretPassword', oldAmount: 0.01, amount: 0.01, receiver: '', relayer: '', server: true });
-  const [proof, setProof] = useState<ProofData>();
   const [depositing, setDepositing] = useState<boolean>(false);
   const [noir, setNoir] = useState<Noir | null>(null);
   const [backend, setBackend] = useState<BarretenbergBackend | null>(null);
@@ -221,7 +219,7 @@ function Withdraw() {
       if (!leafInfo) {
         throw Error("No commitment found for this secret/amount pair");
       }
-      var leafIndex = "0x" +  BigInt(leafInfo.leafIndex).toString(16);
+      var leafIndex = "0x" + BigInt(leafInfo.leafIndex).toString(16);
 
       const merkleTree = new MerkleTree(arrayLeafs, fnHash, {
         sort: false,
@@ -269,16 +267,14 @@ function Withdraw() {
           const proveResult = await prove.json();
           proof = ethers.toBeArray("0x" + proveResult.proof);
           console.log("proveResult", proveResult);
-          setProof({ proof, publicInputs: inputProof });
         } catch (error) {
           throw Error("Proof generation by server failed, try generate proof on web browser.");
         }
       } else {
-        const { proof, publicInputs } = await noir!.generateFinalProof(inputProof);
-        console.log('Proof created: ', proof);
-        setProof({ proof, publicInputs });
+        const result = await noir!.generateFinalProof(inputProof);
+        proof = result.proof;
       }
-
+      console.log('Proof created: ', proof);
       let emptyValue = ethers.encodeBytes32String("");
 
       const tx = await twister.withdraw(inputProof.nullifier, inputProof.leaf, root, inputProof.receiver, inputProof.relayer, inputProof.amount, proof, emptyValue);

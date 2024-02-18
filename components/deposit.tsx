@@ -14,9 +14,6 @@ import React from 'react';
 
 import { Noir } from '@noir-lang/noir_js';
 import { BarretenbergBackend, } from '@noir-lang/backend_barretenberg';
-import { CompiledCircuit, ProofData } from '@noir-lang/types';
-import { compile, createFileManager } from '@noir-lang/noir_wasm';
-
 import { useWeb3ModalProvider, useWeb3ModalAccount } from '@web3modal/ethers/react'
 import { BrowserProvider, Contract, ethers, formatUnits } from 'ethers'
 
@@ -33,7 +30,6 @@ function uuidv4() {
 
 function Deposit() {
   const [input, setInput] = useState({ secret: 'SecretPassword', amount: 0.01, server: true });
-  const [proof, setProof] = useState<ProofData>();
   const [depositing, setDepositing] = useState<boolean>(false);
   const [noir, setNoir] = useState<Noir | null>(null);
   const [backend, setBackend] = useState<BarretenbergBackend | null>(null);
@@ -162,16 +158,14 @@ function Deposit() {
           const proveResult = await prove.json();
           proof = ethers.toBeArray("0x" + proveResult.proof);
           console.log("proveResult", proveResult);
-          setProof({ proof, publicInputs: inputProof });
         } catch (error) {
           throw Error("Proof generation by server failed, try generate proof on web browser.");
         }
       } else {
-        const { proof, publicInputs } = await noir!.generateFinalProof(inputProof);
-        console.log('Proof created: ', proof);
-        setProof({ proof, publicInputs });
+        const result = await noir!.generateFinalProof(inputProof);
+        proof = result.proof;
       }
-
+      console.log('Proof created: ', proof);
 
       const tx = await twister.deposit(inputProof.leaf, proof, { value: amount });
     } catch (error) {
