@@ -8,6 +8,8 @@ There is already a popular protocol for depositing an amount and withdrawing it 
 
 [Sindri repository](https://github.com/youtpout/SindriServer/)
 
+[Website](https://youtpout.github.io/twister/) (due to merkle tree sized for the POC it's limited to 256 transactions)
+
 ## How proof system works
 
 ![App schema](https://github.com/youtpout/twister/blob/main/proof.png?raw=true)
